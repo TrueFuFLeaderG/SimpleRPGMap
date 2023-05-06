@@ -1,0 +1,13 @@
+{
+	"name":"Player",
+	"showName":true,
+	"labelSize":8,
+	"img":"marker2.png", 
+	"radius":8,
+	"aspectratio":1,
+	"rotation":0, 
+	"light":"circleSmoother.png",
+	"lightRadius":256,
+	"lightAspectratio":1,
+	"lightRotation":0 
+}

@@ -1,0 +1,13 @@
+{
+	"name":"SquareLight",
+	"showName":false,
+	"labelSize":8,
+	"img":"", 
+	"radius":8,
+	"aspectratio":1,
+	"rotation":0, 
+	"light":"rectangleSmoother.png",
+	"lightRadius":400,
+	"lightAspectratio":1,
+	"lightRotation":0 
+}
