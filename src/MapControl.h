@@ -24,21 +24,18 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
     void wheelEvent(QWheelEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void leaveEvent(QEvent *event);
+    void resizeEvent(QResizeEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 private:
     QString m_path;
     Scene* m_scene;
     bool m_present=false;
 
 
-    // QWidget interface
-protected:
-    void keyReleaseEvent(QKeyEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void leaveEvent(QEvent *event);
-
-    // QWidget interface
-protected:
-    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // MAPCONTROL_H

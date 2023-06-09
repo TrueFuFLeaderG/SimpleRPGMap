@@ -1,6 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include <Linear.h>
 #include <MapItem.h>
 #include <QGraphicsScene>
 #include <QObject>
@@ -31,6 +32,9 @@ public:
 
     QList<MapItem *> mapItems() const;
 
+    void setLinearEnd(const QPointF &position);
+    void setLinearStart(const QPointF &position);
+    void updateGrid();
 public slots:
     void updateScene();
 private:
@@ -45,15 +49,18 @@ private:
     float m_gridThickness=1;
     // QGraphicsScene interface
 protected:
-    void drawForeground(QPainter *painter, const QRectF &rect);
+    void drawGrid(QPainter *painter, const QRectF &rect);
     void drawBackground(QPainter *painter, const QRectF &rect);
     void timerEvent(QTimerEvent *event);
 private:
+
+    Linear* m_linear=new Linear();
     QBrush m_fogOfWarBrush;
     QString m_path;
     QGraphicsPixmapItem* m_fogOfWar;
     QGraphicsEllipseItem* m_curser;
     QGraphicsPixmapItem* m_background;
+    QGraphicsPixmapItem* m_grid;
     QList<MapItem*> m_mapItems;
     QPixmap m_baseFogOfWar;
     bool m_hide=false;

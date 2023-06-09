@@ -32,22 +32,155 @@ MarkerProperties::MarkerProperties()
      {
          m_light->addItem(QIcon(files[i].absoluteFilePath()),files[i].fileName());
      }
-     QStringList colorNames = QStringList()<<"Black"     <<
-                                             "White"     <<
-                                             "DarkGray"  <<
-                                             "Gray"      <<
-                                             "LightGray" <<
-                                             "Red"       <<
-                                             "Green"     <<
-                                             "Blue"      <<
-                                             "Cyan"      <<
-                                             "Magenta"   <<
-                                             "Yellow"    <<
-                                             "DarkRed"   <<
-                                             "DarkGreen" <<
-                                             "DarkBlue"  <<
-                                             "DarkCyan"  <<
-                                             "DarkMagenta";
+     QStringList colorNames = QStringList()  <<
+         "aliceblue"<<
+         "antiquewhite"<<
+         "aqua"<<
+         "aquamarine"<<
+         "azure"<<
+         "beige"<<
+         "bisque"<<
+         "black"<<
+         "blanchedalmond"<<
+         "blue"<<
+         "blueviolet"<<
+         "brown"<<
+         "burlywood"<<
+         "cadetblue"<<
+         "chartreuse"<<
+         "chocolate"<<
+         "coral"<<
+         "cornflowerblue"<<
+         "cornsilk"<<
+         "crimson"<<
+         "cyan"<<
+         "darkblue"<<
+         "darkcyan"<<
+         "darkgoldenrod"<<
+         "darkgray"<<
+         "darkgreen"<<
+         "darkgrey"<<
+         "darkkhaki"<<
+         "darkmagenta"<<
+         "darkolivegreen"<<
+         "darkorange"<<
+         "darkorchid"<<
+         "darkred"<<
+         "darksalmon"<<
+         "darkseagreen"<<
+         "darkslateblue"<<
+         "darkslategray"<<
+         "darkslategrey"<<
+         "darkturquoise"<<
+         "darkviolet"<<
+         "deeppink"<<
+         "deepskyblue"<<
+         "dimgray"<<
+         "dimgrey"<<
+         "dodgerblue"<<
+         "firebrick"<<
+         "floralwhite"<<
+         "forestgreen"<<
+         "fuchsia"<<
+         "gainsboro"<<
+         "ghostwhite"<<
+         "gold"<<
+         "goldenrod"<<
+         "gray"<<
+         "green"<<
+         "greenyellow"<<
+         "grey"<<
+         "honeydew"<<
+         "hotpink"<<
+         "indianred"<<
+         "indigo"<<
+         "ivory"<<
+         "khaki"<<
+         "lavender"<<
+         "lavenderblush"<<
+         "lawngreen"<<
+         "lemonchiffon"<<
+         "lightblue"<<
+         "lightcoral"<<
+         "lightcyan"<<
+         "lightgoldenrodyellow"<<
+         "lightgray"<<
+         "lightgreen"<<
+         "lightgrey"<<
+         "lightpink"<<
+         "lightsalmon"<<
+         "lightseagreen"<<
+         "lightskyblue"<<
+         "lightslategray"<<
+         "lightslategrey"<<
+         "lightsteelblue"<<
+         "lightyellow"<<
+         "lime"<<
+         "limegreen"<<
+         "linen"<<
+         "magenta"<<
+         "maroon"<<
+         "mediumaquamarine"<<
+         "mediumblue"<<
+         "mediumorchid"<<
+         "mediumpurple"<<
+         "mediumseagreen"<<
+         "mediumslateblue"<<
+         "mediumspringgreen"<<
+         "mediumturquoise"<<
+         "mediumvioletred"<<
+         "midnightblue"<<
+         "mintcream"<<
+         "mistyrose"<<
+         "moccasin"<<
+         "navajowhite"<<
+         "navy"<<
+         "oldlace"<<
+         "olive"<<
+         "olivedrab"<<
+         "orange"<<
+         "orangered"<<
+         "orchid"<<
+         "palegoldenrod"<<
+         "palegreen"<<
+         "paleturquoise"<<
+         "palevioletred"<<
+         "papayawhip"<<
+         "peachpuff"<<
+         "peru"<<
+         "pink"<<
+         "plum"<<
+         "powderblue"<<
+         "purple"<<
+         "red"<<
+         "rosybrown"<<
+         "royalblue"<<
+         "saddlebrown"<<
+         "salmon"<<
+         "sandybrown"<<
+         "seagreen"<<
+         "seashell"<<
+         "sienna"<<
+         "silver"<<
+         "skyblue"<<
+         "slateblue"<<
+         "slategray"<<
+         "slategrey"<<
+         "snow"<<
+         "springgreen"<<
+         "steelblue"<<
+         "tan"<<
+         "teal"<<
+         "thistle"<<
+         "tomato"<<
+         "transparent"
+         "turquoise"<<
+         "violet"<<
+         "wheat"<<
+         "white"<<
+         "whitesmoke"<<
+         "yellow"<<
+         "yellowgreen";
     m_color->setEditable(true);
     m_color->addItem("");
     for(int i=0;i<colorNames.size();i++)

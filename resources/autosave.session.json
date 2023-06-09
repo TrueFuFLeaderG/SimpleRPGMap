@@ -1,0 +1,11 @@
+[
+    {
+        "gridSize": 32,
+        "gridXOffset": 0,
+        "gridYOffset": 0,
+        "objects": [
+        ],
+        "path": "C:/Develop/RPG/SimpleRPGMap/SimpleRPGMap/resources/maps/mine.bmp",
+        "showFogOfWar": true
+    }
+]

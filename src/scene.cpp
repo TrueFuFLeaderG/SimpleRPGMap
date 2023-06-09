@@ -9,17 +9,24 @@ Scene::Scene(const QString &path):m_path(path)
 {
     m_fogOfWarBrush=QBrush(QPixmap("./fogofwar.png"));
     m_curser=new QGraphicsEllipseItem(-8,-8,16,16);
+    addItem(m_linear);
     m_curser->setBrush(QColor(255,0,0,100));
     addItem(m_curser);
-    m_curser->setZValue(100);
+    m_curser->setZValue(10000);
+    m_linear->setZValue(10000);
     m_curser->hide();
+    m_linear->hide();
+    m_grid=new QGraphicsPixmapItem;
+    addItem(m_grid);
+    m_grid->setZValue(1);
     if(path!="")
     {
-        QPixmap pixmap=QPixmap(path);
+        QPixmap pixmap=QPixmap(path).scaled(QSize(1920,1080),Qt::KeepAspectRatio,Qt::SmoothTransformation);
         m_background=addPixmap(pixmap);
-
         QPainter painter;
         m_baseFogOfWar=QPixmap(pixmap.size());
+        m_grid->setPixmap(QPixmap(pixmap.size()));
+
         m_baseFogOfWar.fill( Qt::transparent);
 
         painter.begin(&m_baseFogOfWar);
@@ -32,13 +39,18 @@ Scene::Scene(const QString &path):m_path(path)
     }
     else
     {
+        m_baseFogOfWar=QPixmap(16,16);
+        m_baseFogOfWar.fill( Qt::transparent);
         m_fogOfWar=new QGraphicsPixmapItem(m_baseFogOfWar);
         m_fogOfWar->setZValue(1000);
         addItem(m_fogOfWar);
+        updateFogOfWar();
         m_background=addPixmap(QPixmap());
+        setSceneRect(QRectF(0,0,m_baseFogOfWar.width(),m_baseFogOfWar.width()));
     }
+    updateGrid();
     updateFogOfWar();
-    startTimer(100);
+    startTimer(30);
 }
 
 void Scene::updateFogOfWar()
@@ -67,11 +79,63 @@ void Scene::updateFogOfWar()
 
 }
 
+void Scene::updateGrid()
+{
+
+    QPainter painter;
+    QPixmap pixmap=m_grid->pixmap();
+    if(pixmap.isNull())return;
+    pixmap.fill(Qt::transparent);
+    painter.begin(&pixmap);
+    painter.setRenderHints(QPainter::SmoothPixmapTransform|QPainter::Antialiasing);
+    drawGrid(&painter,QRectF(QPointF(),pixmap.size()));
+    painter.end();
+    m_grid->setPixmap(pixmap);
+
+}
 void Scene::hideScene()
 {
     m_curser->hide();
     m_hide=true;
     invalidate();
+}
+
+void Scene::setLinearStart(const QPointF &position)
+{
+    if(m_background->pixmap().isNull())
+        return;
+    if(!sceneRect().contains(position))
+    {
+        m_linear->hide();
+        return;
+    }
+    m_linear->setStartPoint(position);
+    m_linear->show();
+    if(!sceneRect().contains(position))
+    {
+        m_linear->hide();
+    }
+    else
+    {
+        m_linear->show();
+    }
+    invalidate(m_linear->boundingRect());
+}
+
+void Scene::setLinearEnd(const QPointF &position)
+{
+    if(m_background->pixmap().isNull())
+        return;
+    m_linear->setEndPoint(position);
+    if(!sceneRect().contains(position))
+    {
+        m_linear->hide();
+    }
+    else
+    {
+        m_linear->show();
+    }
+    invalidate(m_linear->boundingRect());
 }
 
 void Scene::setCursorPos(const QPointF &position)
@@ -111,7 +175,7 @@ void Scene::updateNow()
     if(m_gridSize!=m_otherScene->m_gridSize||
             m_gridXOffset!=m_otherScene->m_gridXOffset||
             m_gridYOffset!=m_otherScene->m_gridYOffset )
-        invalidate();
+        updateGrid();
     m_gridSize=m_otherScene->m_gridSize;
     m_gridXOffset=m_otherScene->m_gridXOffset;
     m_gridYOffset=m_otherScene->m_gridYOffset;
@@ -131,7 +195,7 @@ int Scene::gridXOffset() const
 void Scene::setGridXOffset(int newGridXOffset)
 {
     m_gridXOffset = newGridXOffset;
-    invalidate();
+    updateGrid();
 }
 
 int Scene::gridYOffset() const
@@ -142,7 +206,7 @@ int Scene::gridYOffset() const
 void Scene::setGridYOffset(int newGridYOffset)
 {
     m_gridYOffset = newGridYOffset;
-    invalidate();
+    updateGrid();
 }
 
 bool Scene::showFogOfWar() const
@@ -174,7 +238,7 @@ int Scene::gridSize() const
 void Scene::setGridSize(int newGridSize)
 {
     m_gridSize = newGridSize;
-    invalidate();
+    updateGrid();
 }
 
 void Scene::syncScene(Scene *other)
@@ -193,21 +257,24 @@ void Scene::syncScene(Scene *other)
     connect(other,&Scene::changed,this,&Scene::updateScene);
 
 
-    QPixmap background=QPixmap(other->m_path);
+    QPixmap background=QPixmap(other->m_path).scaled(QSize(1920,1080),Qt::KeepAspectRatio,Qt::SmoothTransformation);
     m_background->setPixmap(background);
     QPainter painter;
     m_baseFogOfWar=QPixmap(m_background->pixmap().size());
+    m_grid->setPixmap(QPixmap(m_background->pixmap().size()));
     m_baseFogOfWar.fill( Qt::transparent);
     QRect rect(0,0,m_baseFogOfWar.width(),m_baseFogOfWar.height());
     painter.begin(&m_baseFogOfWar);
     painter.fillRect(rect,m_fogOfWarBrush);
+
     setSceneRect(rect);
     painter.end();
+    updateGrid();
 
     updateNow();
 }
 
-void Scene::drawForeground(QPainter *painter, const QRectF &rect)
+void Scene::drawGrid(QPainter *painter, const QRectF &rect)
 {
     if(m_hide||m_gridSize<=2)
     {
@@ -257,5 +324,6 @@ QGraphicsPixmapItem *Scene::background() const
 void Scene::addMarker(MapItem *item)
 {
     m_mapItems<<item;
+    item->setZValue(m_mapItems.size()+1);
     addItem(item);
 }

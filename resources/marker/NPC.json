@@ -3,7 +3,7 @@
 	"showName":true,
 	"labelSize":16,
 	"img":"Knight.png", 
-	"color":"Yellow", 
+	"color":"darkorange", 
 	"radius":32,
 	"aspectratio":1,
 	"rotation":0, 

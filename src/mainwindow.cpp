@@ -39,16 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
     addDockWidget(Qt::RightDockWidgetArea,markerPropertiesDoc,Qt::Vertical);
 
     m_toolBar=addToolBar(tr("Controls"));
-    QList<QScreen*> screens=QGuiApplication::screens();
-    QComboBox* box=new QComboBox;
-    box->addItem(tr("No Preview"));
-    box->addItem(tr("Manual Preview"));
-    for(int i=0;i<screens.size();i++)
-    {
-        box->addItem(tr("Screen %0 %1").arg(i).arg(screens[i]->model()));
-    }
-    connect(box,&QComboBox::currentIndexChanged,this,&MainWindow::setPresetScreen);
-    m_toolBar->addWidget(box);
+    m_box=new QComboBox;
+    connect(m_box,&QComboBox::currentIndexChanged,this,&MainWindow::setPresetScreen);
+    m_toolBar->addWidget(m_box);
+    updatePreviewOptions();
     QAction* showCurrentMap=m_toolBar->addAction(QIcon(),tr("Show Current Map"));
     connect(showCurrentMap,&QAction::triggered,this,&MainWindow::showMap);
     QAction* hideMap= m_toolBar->addAction(QIcon(),tr("Hide Map"));
@@ -71,6 +65,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::setPresetScreen(int index)
 {
+    if(m_isUpdating)
+        return;
+
+    updatePreviewOptions();
     if(m_presetMap)
     {
         m_presetMap->deleteLater();
@@ -213,6 +211,7 @@ void MainWindow::load(const QString &path,bool message)
             {
                 control->scene()->addMarker(new MapItem(array[j].toObject()));
             }
+            control->scene()->updateFogOfWar();
             m_control->setActiveSubWindow(0);
             m_control->openMap(object["path"].toString());
 
@@ -230,6 +229,22 @@ void MainWindow::load(const QString &path,bool message)
 MapControl *MainWindow::presetMap() const
 {
     return m_presetMap;
+}
+
+void MainWindow::updatePreviewOptions()
+{
+    m_isUpdating=true;
+    QString text=m_box->currentText();
+    m_box->clear();
+    QList<QScreen*> screens=QGuiApplication::screens();
+    m_box->addItem(tr("No Preview"));
+    m_box->addItem(tr("Manual Preview"));
+    for(int i=0;i<screens.size();i++)
+    {
+        m_box->addItem(tr("Screen %0 %1 %2 %3").arg(i).arg(screens[i]->name()).arg(screens[i]->model()).arg(screens[i]->manufacturer()));
+    }
+    m_box->setCurrentText(text);
+    m_isUpdating=false;
 }
 
 MarkerProperties *MainWindow::markerProperties() const

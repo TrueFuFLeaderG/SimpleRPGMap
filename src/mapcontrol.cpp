@@ -108,17 +108,15 @@ void MapControl::keyReleaseEvent(QKeyEvent *event)
     {
         MainWindow::mainWindow()->markerProperties()->deleteCurrentItem();
     }
+    if(event->key()==Qt::Key_Return&& (event->modifiers()&Qt::AltModifier))
+    {
+        if(isFullScreen())
+            showNormal();
+        else
+            showFullScreen();
+    }
 }
 
-void MapControl::mouseMoveEvent(QMouseEvent *event)
-{
-
-
-    QGraphicsView::mouseMoveEvent(event);
-    MapControl* map=MainWindow::mainWindow()->presetMap();
-    if(map)
-        map->scene()->setCursorPos( mapToScene(event->pos()));
-}
 
 void MapControl::leaveEvent(QEvent *event)
 {
@@ -132,13 +130,82 @@ void MapControl::leaveEvent(QEvent *event)
 void MapControl::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
-    resetTransform();
-    double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
-    double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
-    scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+    if(m_path=="")
+    {
+
+        resetTransform();
+        double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
+        double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
+        scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+    }
 
 }
 
+void MapControl::mousePressEvent(QMouseEvent *event)
+{
+    QGraphicsView::mousePressEvent(event);
+    MapControl* map=MainWindow::mainWindow()->presetMap();
+    if(map)
+    {
+        if(event->button()==Qt::RightButton)
+        {
+            map->scene()->setLinearStart(mapToScene(event->pos()));
+            map->scene()->setLinearEnd(mapToScene(event->pos()));
+            map->scene()->setCursorPos( QPointF(-1,-1));
+        }
+    }
+    if(event->button()==Qt::RightButton)
+    {
+        scene()->setLinearStart(mapToScene(event->pos()));
+        scene()->setLinearEnd(mapToScene(event->pos()));
+    }
+}
+
+void MapControl::mouseReleaseEvent(QMouseEvent *event)
+{
+    QGraphicsView::mouseReleaseEvent(event);
+    MapControl* map=MainWindow::mainWindow()->presetMap();
+    if(map)
+    {
+        if(event->button()==Qt::RightButton)
+        {
+
+            map->scene()->setLinearStart(QPointF(-1,-1));
+            map->scene()->setLinearEnd(QPointF(-1,-1));
+            map->scene()->setCursorPos( mapToScene(event->pos()));
+        }
+    }
+    if(event->button()==Qt::RightButton)
+    {
+
+        scene()->setLinearStart(QPointF(-1,-1));
+        scene()->setLinearEnd(QPointF(-1,-1));
+    }
+
+}
+
+void MapControl::mouseMoveEvent(QMouseEvent *event)
+{
+
+
+    QGraphicsView::mouseMoveEvent(event);
+    MapControl* map=MainWindow::mainWindow()->presetMap();
+    if(map)
+    {
+        if(event->buttons()&Qt::RightButton)
+        {
+            map->scene()->setLinearEnd(mapToScene(event->pos()));
+        }
+        else
+        {
+            map->scene()->setCursorPos( mapToScene(event->pos()));
+        }
+    }
+    if(event->buttons()&Qt::RightButton)
+    {
+        scene()->setLinearEnd(mapToScene(event->pos()));
+    }
+}
 
 Scene *MapControl::scene() const
 {

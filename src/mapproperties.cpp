@@ -8,6 +8,8 @@ MapProperties::MapProperties(QWidget *parent)
     QFormLayout* layout=new QFormLayout;
     setLayout(layout);
     m_gridSize->setMaximum(99999);
+    m_gridXOffset->setRange(-99999,99999);
+    m_gridYOffset->setRange(-99999,99999);
     layout->addRow(tr("Grid size"),m_gridSize);
     layout->addRow(tr("Grid x offset"),m_gridXOffset);
     layout->addRow(tr("Grid y offset"),m_gridYOffset);

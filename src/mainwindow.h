@@ -20,7 +20,7 @@ public:
     MarkerProperties *markerProperties() const;
     static MainWindow* mainWindow(){return m_mainWindow;}
     MapControl *presetMap() const;
-
+    void updatePreviewOptions();
 public slots:
     void hideMap();
     void setPresetScreen(int index);
@@ -38,11 +38,12 @@ private:
     MarkerProperties* m_markerProperties=new MarkerProperties;
     MapProperties* m_mapProperties=new MapProperties;
 
+    bool m_isUpdating=false;
     MapControl* m_presetMap=0;
     QToolBar* m_toolBar;
     Scene* m_scene=0;
     static MainWindow* m_mainWindow;
-
+    QComboBox* m_box;
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *event);

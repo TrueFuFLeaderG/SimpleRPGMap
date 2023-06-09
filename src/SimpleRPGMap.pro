@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     controlarea.cpp \
+    linear.cpp \
     main.cpp \
     mainwindow.cpp \
     mapcontrol.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 
 HEADERS += \
     controlarea.h \
+    linear.h \
     mainwindow.h \
     mapcontrol.h \
     mapitem.h \

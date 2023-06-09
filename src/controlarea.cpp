@@ -10,6 +10,7 @@ ControlArea::ControlArea()
     setTabsMovable(true);
     setViewMode(TabbedView);
     setTabsClosable(true);
+    setDocumentMode(true);
 }
 
 MapControl* ControlArea::openMap(const QString &path)
@@ -22,6 +23,7 @@ MapControl* ControlArea::openMap(const QString &path)
        if(windows[i]->property("filePath").toString()==absFilePath)
        {
            setActiveSubWindow(windows[i]);
+           windows[i]->activateWindow();
            return currentMapControl();
        }
     }
@@ -40,6 +42,11 @@ MapControl *ControlArea::currentMapControl()
 
     QMdiSubWindow* subwindow=currentSubWindow();
     if(!subwindow)
-        return 0;
+    {
+        QList<QMdiSubWindow *>  list=subWindowList();
+        if(list.isEmpty())
+            return 0;
+        subwindow=list.first();
+    }
     return qobject_cast<MapControl*>(subwindow->widget());
 }
