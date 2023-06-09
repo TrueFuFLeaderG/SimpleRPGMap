@@ -1,0 +1,13 @@
+{
+	"name":"Rogue",
+	"showName":true,
+	"labelSize":16,
+	"img":"Rogue.png",  
+	"radius":32,
+	"aspectratio":1,
+	"rotation":0, 
+	"light":"circleSmoother.png",
+	"lightRadius":400,
+	"lightAspectratio":1,
+	"lightRotation":0 
+}

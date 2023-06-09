@@ -15,10 +15,10 @@ MarkerProperties::MarkerProperties()
      m_labelSize->setMaximum(9999);
      m_radius->setMaximum(9999);
      m_aspectratio->setMaximum(9999);
-     m_rotation->setMaximum(9999);
+     m_rotation->setMaximum(360);
      m_lightRadius->setMaximum(9999);
      m_lightAspectratio->setMaximum(9999);
-     m_lightRotation->setMaximum(9999);
+     m_lightRotation->setMaximum(360);
 
     m_img->setEditable(true);
     m_light->setEditable(true);
@@ -32,12 +32,35 @@ MarkerProperties::MarkerProperties()
      {
          m_light->addItem(QIcon(files[i].absoluteFilePath()),files[i].fileName());
      }
-
-
+     QStringList colorNames = QStringList()<<"Black"     <<
+                                             "White"     <<
+                                             "DarkGray"  <<
+                                             "Gray"      <<
+                                             "LightGray" <<
+                                             "Red"       <<
+                                             "Green"     <<
+                                             "Blue"      <<
+                                             "Cyan"      <<
+                                             "Magenta"   <<
+                                             "Yellow"    <<
+                                             "DarkRed"   <<
+                                             "DarkGreen" <<
+                                             "DarkBlue"  <<
+                                             "DarkCyan"  <<
+                                             "DarkMagenta";
+    m_color->setEditable(true);
+    m_color->addItem("");
+    for(int i=0;i<colorNames.size();i++)
+    {
+        QPixmap p(16,16);
+        p.fill(QColor(colorNames[i]));
+        m_color->addItem(QIcon(p),colorNames[i]);
+    }
     layout->addRow(tr("Name"),m_name);
     layout->addRow(tr("Show name"),m_showName);
     layout->addRow(tr("Label name size"),m_labelSize);
     layout->addRow(tr("Marker"),m_img);
+    layout->addRow(tr("Color"),m_color);
     layout->addRow(tr("Marker size"),m_radius);
     layout->addRow(tr("Marker aspect ratio"),m_aspectratio);
     layout->addRow(tr("Marker rotation"),m_rotation);
@@ -55,18 +78,19 @@ MarkerProperties::MarkerProperties()
     connect(m_showName,&QCheckBox::stateChanged,this,&MarkerProperties::updateItem);
     connect(m_labelSize,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_img,&QComboBox::currentIndexChanged,this,&MarkerProperties::updateItem);
+    connect(m_color,&QComboBox::currentTextChanged,this,&MarkerProperties::updateItem);
     connect(m_radius,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_aspectratio,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
-    connect(m_rotation,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
+    connect(m_rotation,&QSlider::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_light,&QComboBox::currentIndexChanged,this,&MarkerProperties::updateItem);
     connect(m_lightRadius,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_lightAspectratio,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
-    connect(m_lightRotation,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
+    connect(m_lightRotation,&QSlider::valueChanged,this,&MarkerProperties::updateItem);
 
     setDisabled(true);
 }
 
-void MarkerProperties::focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem *oldFocusItem, Qt::FocusReason reason)
+void MarkerProperties::focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem */*oldFocusItem*/, Qt::FocusReason /*reason*/)
 {
     MapItem* nextItem=qgraphicsitem_cast<MapItem*>(newFocusItem);
     if(nextItem!=0)
@@ -84,6 +108,7 @@ void MarkerProperties::focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem *
         m_lightRadius->setValue(nextItem->lightRadius());
         m_lightAspectratio->setValue(nextItem->lightAspectratio());
         m_lightRotation->setValue(nextItem->lightRotation());
+        m_color->setCurrentText(nextItem->color());
         m_currentItem=nextItem;
     }
 }
@@ -103,12 +128,16 @@ void MarkerProperties::updateItem()
     m_currentItem->setLightRadius(m_lightRadius->value());
     m_currentItem->setLightAspectratio(m_lightAspectratio->value());
     m_currentItem->setLightRotation(m_lightRotation->value());
-
+    m_currentItem->setColor(m_color->currentText());
     m_currentItem->reload();
 
 }
 
+
 void MarkerProperties::deleteCurrentItem()
 {
-    m_currentItem->remove();
+    if(m_currentItem)
+        m_currentItem->remove();
+    m_currentItem=0;
+    setDisabled(true);
 }

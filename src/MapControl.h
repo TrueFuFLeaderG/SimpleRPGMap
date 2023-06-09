@@ -9,13 +9,14 @@ class MapControl : public QGraphicsView
 {
     Q_OBJECT
 public:
-    MapControl(const QString& path);
-    MapControl(bool present);
+    MapControl(const QString& path,bool present=false);
 
     void hideScene();
     void syncScene(MapControl* other);
     // QWidget interface
     Scene *scene() const;
+
+    QString path() const;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -24,6 +25,7 @@ protected:
     void dropEvent(QDropEvent *event);
     void wheelEvent(QWheelEvent *event);
 private:
+    QString m_path;
     Scene* m_scene;
     bool m_present=false;
 
@@ -31,6 +33,12 @@ private:
     // QWidget interface
 protected:
     void keyReleaseEvent(QKeyEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void leaveEvent(QEvent *event);
+
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // MAPCONTROL_H

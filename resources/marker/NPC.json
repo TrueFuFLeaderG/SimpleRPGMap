@@ -1,0 +1,14 @@
+{
+	"name":"NPC",
+	"showName":true,
+	"labelSize":16,
+	"img":"Knight.png", 
+	"color":"Yellow", 
+	"radius":32,
+	"aspectratio":1,
+	"rotation":0, 
+	"light":"",
+	"lightRadius":0,
+	"lightAspectratio":1,
+	"lightRotation":0 
+}

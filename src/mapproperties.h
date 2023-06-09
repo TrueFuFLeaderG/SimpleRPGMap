@@ -20,6 +20,8 @@ public slots:
 signals:
 private:
     QDoubleSpinBox* m_gridSize=new QDoubleSpinBox;
+    QDoubleSpinBox* m_gridXOffset=new QDoubleSpinBox;
+    QDoubleSpinBox* m_gridYOffset=new QDoubleSpinBox;
     QCheckBox* m_showFogOfWar=new QCheckBox;
 
     Scene* m_scene;

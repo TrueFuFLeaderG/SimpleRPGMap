@@ -1,16 +1,12 @@
 #include "mapcontrol.h"
 
+#include <MainWindow.h>
 #include <MapItem.h>
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <Scene.h>
 
-MapControl::MapControl(const QString &path)
-{
-    setScene(m_scene=new Scene(path));
-}
-
-MapControl::MapControl(bool present):m_present(present)
+MapControl::MapControl(const QString &path, bool present):m_path(path),m_present(present)
 {
     if(present)
     {
@@ -18,7 +14,11 @@ MapControl::MapControl(bool present):m_present(present)
         setTransformationAnchor(QGraphicsView::AnchorViewCenter);
         setResizeAnchor(QGraphicsView::AnchorViewCenter);
     }
-    setScene(m_scene=new Scene);
+    else
+    {
+        setMouseTracking(true);
+    }
+    setScene(m_scene=new Scene(path));
 }
 
 void MapControl::hideScene()
@@ -32,6 +32,12 @@ void MapControl::syncScene(MapControl *other)
         m_scene->syncScene(other->scene());
     else
         m_scene->syncScene(0);
+
+    resetTransform();
+    double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
+    double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
+    scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+
 }
 
 void MapControl::dragEnterEvent(QDragEnterEvent *event)
@@ -86,6 +92,11 @@ void MapControl::wheelEvent(QWheelEvent *event)
 
 }
 
+QString MapControl::path() const
+{
+    return m_path;
+}
+
 void MapControl::keyReleaseEvent(QKeyEvent *event)
 {
     QGraphicsView::keyReleaseEvent(event);
@@ -93,6 +104,39 @@ void MapControl::keyReleaseEvent(QKeyEvent *event)
     {
         resetTransform();
     }
+    if(event->key()==Qt::Key_Delete||event->key()==Qt::Key_Backspace)
+    {
+        MainWindow::mainWindow()->markerProperties()->deleteCurrentItem();
+    }
+}
+
+void MapControl::mouseMoveEvent(QMouseEvent *event)
+{
+
+
+    QGraphicsView::mouseMoveEvent(event);
+    MapControl* map=MainWindow::mainWindow()->presetMap();
+    if(map)
+        map->scene()->setCursorPos( mapToScene(event->pos()));
+}
+
+void MapControl::leaveEvent(QEvent *event)
+{
+
+    QGraphicsView::leaveEvent(event);
+    MapControl* map=MainWindow::mainWindow()->presetMap();
+    if(map)
+        map->scene()->setCursorPos( QPointF(-1,-1));
+}
+
+void MapControl::resizeEvent(QResizeEvent *event)
+{
+    QGraphicsView::resizeEvent(event);
+    resetTransform();
+    double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
+    double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
+    scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+
 }
 
 

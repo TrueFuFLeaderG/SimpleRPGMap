@@ -1,9 +1,10 @@
 {
 	"name":"Enemy",
 	"showName":true,
-	"labelSize":8,
-	"img":"marker3.png", 
-	"radius":8,
+	"labelSize":16,
+	"img":"Enemy.png", 
+	"color":"DarkRed", 
+	"radius":32,
 	"aspectratio":1,
 	"rotation":0, 
 	"light":"",

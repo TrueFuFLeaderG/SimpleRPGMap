@@ -1,6 +1,7 @@
 #include "mapitem.h"
 
 #include <QFile>
+#include <QGraphicsColorizeEffect>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -61,6 +62,7 @@ void MapItem::loadFromObj(const QJsonObject &obj)
     m_showName=obj.value("showName").toBool(true);
     m_labelSize=obj.value("labelSize").toDouble(16);
     m_img=obj.value("img").toString("marker2.png");
+    m_color=obj.value("color").toString("");
     m_radius=obj.value("radius").toDouble(16);
     m_aspectratio=obj.value("aspectratio").toDouble(1);
     m_rotation=obj.value("rotation").toDouble(0);
@@ -68,6 +70,9 @@ void MapItem::loadFromObj(const QJsonObject &obj)
     m_lightRadius=obj.value("lightRadius").toDouble(16);
     m_lightAspectratio=obj.value("lightAspectratio").toDouble(1);
     m_lightRotation=obj.value("lightRotation").toDouble(0);
+    setX(obj.value("x").toDouble());
+    setY(obj.value("y").toDouble());
+
     reload();
 }
 QJsonObject MapItem::toObj()
@@ -84,6 +89,9 @@ QJsonObject MapItem::toObj()
     obj["lightRadius"]=m_lightRadius;
     obj["lightAspectratio"]=m_lightAspectratio;
     obj["lightRotation"]=m_lightRotation;
+    obj["color"]=m_color;
+    obj["x"]=x();
+    obj["y"]=y();
 
     return obj;
 }
@@ -195,6 +203,16 @@ void MapItem::remove()
         currentScene->removeMarker(this);
     delete this;
 }
+
+QString MapItem::color() const
+{
+    return m_color;
+}
+
+void MapItem::setColor(const QString &newColor)
+{
+    m_color = newColor;
+}
 MapItem *MapItem::createPresentItem()
 {
     MapItem* ret=new MapItem(toObj());
@@ -213,14 +231,21 @@ MapItem *MapItem::createPresentItem()
 void MapItem::reload()
 {
     m_pixmapItem->setPixmap(createImage());
-    m_pixmapItem->setPos(-m_pixmapItem->boundingRect().width()/2,-m_pixmapItem->boundingRect().height()/2);
-
+    m_pixmapItem->setOffset(-m_pixmapItem->boundingRect().width()/2,-m_pixmapItem->boundingRect().height()/2);
+    m_pixmapItem->setTransformationMode(Qt::SmoothTransformation);
     m_pixmapItem->setRotation(m_rotation);
     m_textItem->setHtml("<p style=\"color: white;background-color:rgba(0, 0, 0, 0.8);\">"+m_name+"</p>");
 
+    if(!m_color.isEmpty())
+    {
+        QGraphicsColorizeEffect* effect=new QGraphicsColorizeEffect;
+        effect->setColor(QColor::fromString(m_color));
+        m_pixmapItem->setGraphicsEffect(effect);
+    }
 
     m_textItem->setFont(QFont("Arial",m_labelSize));
-    m_textItem->setPos(-(QFontMetricsF(m_textItem->font()).horizontalAdvance(m_name)/2)-m_pixmapItem->boundingRect().width()/2,-m_labelSize-m_aspectratio*m_radius-m_pixmapItem->boundingRect().height()/2-2);
+    m_textItem->setPos(-m_textItem->boundingRect().width()/2,
+                       -m_textItem->boundingRect().height()-(m_aspectratio*(m_radius-m_pixmapItem->boundingRect().height()/2))-2);
 
 
     Scene* currentScene= qobject_cast<Scene*>(scene());

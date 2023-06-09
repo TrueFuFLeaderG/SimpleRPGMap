@@ -58,12 +58,16 @@ public:
     void setLightRotation(double newLightRotation);
 
     void remove();
+    QString color() const;
+    void setColor(const QString &newColor);
+
 signals:
     void nameChanged();
 
 private:
     QString m_path;
     QString m_name= "Player";
+    QString m_color= "";
     bool m_showName=true;
     double m_labelSize=16;
     QString m_img="marker2.png";

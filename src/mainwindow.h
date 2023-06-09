@@ -17,28 +17,36 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    MarkerProperties *markerProperties() const;
+    static MainWindow* mainWindow(){return m_mainWindow;}
+    MapControl *presetMap() const;
+
 public slots:
     void hideMap();
-private slots:
     void setPresetScreen(int index);
     void openMap(const QModelIndex& model);
     void showMap();
     void upateSettings();
+    void loadState();
+    void saveState();
 private:
+    void save(const QString& path);
+    void load(const QString& path, bool message=true);
     ControlArea* m_control=new ControlArea;
     MarkerList* m_marker=new MarkerList;
     MapList* m_maplist=new MapList;
-    MapShow* m_display=new MapShow;
     MarkerProperties* m_markerProperties=new MarkerProperties;
     MapProperties* m_mapProperties=new MapProperties;
 
     MapControl* m_presetMap=0;
     QToolBar* m_toolBar;
     Scene* m_scene=0;
-
+    static MainWindow* m_mainWindow;
 
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *event);
+
+    void timerEvent(QTimerEvent *event);
 };
 #endif // MAINWINDOW_H

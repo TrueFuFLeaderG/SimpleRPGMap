@@ -12,7 +12,7 @@ ControlArea::ControlArea()
     setTabsClosable(true);
 }
 
-void ControlArea::openMap(const QString &path)
+MapControl* ControlArea::openMap(const QString &path)
 {
     QFileInfo filepath(path);
     QString absFilePath=filepath.absoluteFilePath();
@@ -22,7 +22,7 @@ void ControlArea::openMap(const QString &path)
        if(windows[i]->property("filePath").toString()==absFilePath)
        {
            setActiveSubWindow(windows[i]);
-           return;
+           return currentMapControl();
        }
     }
     MapControl* controls= new MapControl(path);
@@ -31,7 +31,8 @@ void ControlArea::openMap(const QString &path)
     subwindow->setWindowFlag(Qt::WindowCloseButtonHint);
     subwindow->setAttribute(Qt::WA_DeleteOnClose);
     subwindow->setProperty("filePath",absFilePath);
-    subwindow->show();
+    subwindow->showMaximized();
+    return controls;
 }
 
 MapControl *ControlArea::currentMapControl()

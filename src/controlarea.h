@@ -12,7 +12,7 @@ class ControlArea : public QMdiArea
     Q_OBJECT
 public:
     ControlArea();
-    void openMap(const QString& path);
+    MapControl* openMap(const QString& path);
 
     MapControl* currentMapControl();
 

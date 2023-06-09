@@ -1,9 +1,9 @@
 {
 	"name":"RoundLight",
 	"showName":false,
-	"labelSize":8,
+	"labelSize":16,
 	"img":"", 
-	"radius":8,
+	"radius":80,
 	"aspectratio":1,
 	"rotation":0, 
 	"light":"circleSmoother.png",
