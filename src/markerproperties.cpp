@@ -1,8 +1,12 @@
 #include "markerproperties.h"
 
+#include <MainWindow.h>
+#include <QFileDialog>
 #include <QFileInfoList>
 #include <QFormLayout>
 #include <QIcon>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QPushButton>
 #include <qdir.h>
 
@@ -191,6 +195,7 @@ MarkerProperties::MarkerProperties()
     }
     layout->addRow(tr("Name"),m_name);
     layout->addRow(tr("Show name"),m_showName);
+    layout->addRow(tr("Hide background"),m_removeBackground);
     layout->addRow(tr("Label name size"),m_labelSize);
     layout->addRow(tr("Marker"),m_img);
     layout->addRow(tr("Color"),m_color);
@@ -203,11 +208,18 @@ MarkerProperties::MarkerProperties()
     layout->addRow(tr("Light rotation"),m_lightRotation);
     layout->addRow(tr("Light rotation"),m_lightRotation);
 
+    QPushButton* button3=new QPushButton(tr("Duplicate item"));
+    layout->addRow(button3);
+    QPushButton* button2=new QPushButton(tr("Save this item as Template"));
+    layout->addRow(button2);
     QPushButton* button=new QPushButton(tr("Delete this item"));
     layout->addRow(button);
+    connect(button3,&QPushButton::clicked,this,&MarkerProperties::duplicateCurrentItem);
+    connect(button2,&QPushButton::clicked,this,&MarkerProperties::saveCurrentItem);
     connect(button,&QPushButton::clicked,this,&MarkerProperties::deleteCurrentItem);
     connect(m_name,&QLineEdit::textChanged,this,&MarkerProperties::updateItem);
     connect(m_name,&QLineEdit::textChanged,this,&MarkerProperties::updateItem);
+    connect(m_removeBackground,&QCheckBox::stateChanged,this,&MarkerProperties::updateItem);
     connect(m_showName,&QCheckBox::stateChanged,this,&MarkerProperties::updateItem);
     connect(m_labelSize,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_img,&QComboBox::currentIndexChanged,this,&MarkerProperties::updateItem);
@@ -232,6 +244,7 @@ void MarkerProperties::focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem *
         setDisabled(false);
         m_name->setText(nextItem->name());
         m_showName->setChecked(nextItem->showName());
+        m_removeBackground->setChecked(nextItem->removeBackground());
         m_labelSize->setValue(nextItem->labelSize());
         m_img->setCurrentText(nextItem->img());
         m_radius->setValue(nextItem->radius());
@@ -252,6 +265,7 @@ void MarkerProperties::updateItem()
         return;
     m_currentItem->setName(m_name->text());
     m_currentItem->setShowName(m_showName->isChecked());
+    m_currentItem->setRemoveBackground(m_removeBackground->isChecked());
     m_currentItem->setLabelSize(m_labelSize->value());
     m_currentItem->setImg(m_img->currentText());
     m_currentItem->setRadius(m_radius->value());
@@ -265,7 +279,38 @@ void MarkerProperties::updateItem()
     m_currentItem->reload();
 
 }
+void MarkerProperties::duplicateCurrentItem()
+{
 
+    if(!m_currentItem)
+        return;
+    Scene* scene=qobject_cast<Scene*>(m_currentItem->scene());
+    if(!scene)
+        return;
+    MapItem* newMarker(new MapItem(m_currentItem->toObj()));
+    newMarker->setPos(m_currentItem->pos()+QPointF(5,5));
+    scene->addMarker(newMarker);
+    scene->clearSelection();
+    newMarker->setSelected(true);
+    scene->setFocusItem(newMarker,Qt::MouseFocusReason);
+}
+void MarkerProperties::saveCurrentItem()
+{
+    QString path=QFileDialog::getSaveFileName(this,tr("Save template"),"./marker/","*.json");
+    if(path.isEmpty())
+        return;
+
+    if(!m_currentItem)
+        return;
+    QJsonDocument doc(m_currentItem->toObj());
+    QFile f(path);
+    if(f.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+        f.write(doc.toJson());
+        f.close();
+    }
+    MainWindow::mainWindow()->marker()->updateList();
+}
 
 void MarkerProperties::deleteCurrentItem()
 {

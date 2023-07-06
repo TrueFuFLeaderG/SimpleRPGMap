@@ -16,6 +16,7 @@ public:
 private:
     QGraphicsLineItem* m_line=new QGraphicsLineItem;
     QGraphicsTextItem* m_text=new QGraphicsTextItem;
+    QGraphicsEllipseItem* m_circle=new QGraphicsEllipseItem;
 };
 
 #endif // LINEAR_H

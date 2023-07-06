@@ -34,6 +34,7 @@ public:
 
     void setLinearEnd(const QPointF &position);
     void setLinearStart(const QPointF &position);
+    void hideLinear();
     void updateGrid();
 public slots:
     void updateScene();

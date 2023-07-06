@@ -21,6 +21,10 @@ public:
     static MainWindow* mainWindow(){return m_mainWindow;}
     MapControl *presetMap() const;
     void updatePreviewOptions();
+    MarkerList *marker() const;
+
+    ControlArea *control() const;
+
 public slots:
     void hideMap();
     void setPresetScreen(int index);

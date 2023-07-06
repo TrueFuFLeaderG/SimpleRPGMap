@@ -19,12 +19,15 @@ public slots:
      void focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem *oldFocusItem, Qt::FocusReason reason);
      void updateItem();
      void deleteCurrentItem();
+     void saveCurrentItem();
+     void duplicateCurrentItem();
 private:
      MapItem* m_currentItem=0;
 
 
      QLineEdit* m_name= new QLineEdit;
      QCheckBox* m_showName= new QCheckBox;
+     QCheckBox* m_removeBackground= new QCheckBox;
      QDoubleSpinBox* m_labelSize= new QDoubleSpinBox;
      QComboBox* m_img= new QComboBox;
      QComboBox* m_color= new QComboBox;

@@ -61,6 +61,9 @@ public:
     QString color() const;
     void setColor(const QString &newColor);
 
+    bool removeBackground() const;
+    void setRemoveBackground(bool newRemoveBackground);
+
 signals:
     void nameChanged();
 
@@ -69,6 +72,7 @@ private:
     QString m_name= "Player";
     QString m_color= "";
     bool m_showName=true;
+    bool m_removeBackground=true;
     double m_labelSize=16;
     QString m_img="marker2.png";
     double m_radius=8;

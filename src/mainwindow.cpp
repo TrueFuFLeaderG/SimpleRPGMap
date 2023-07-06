@@ -93,7 +93,7 @@ void MainWindow::setPresetScreen(int index)
         m_presetMap->setLineWidth(0);
         m_presetMap->setFrameStyle(QFrame::NoFrame);
         m_presetMap->setScreen(screen);
-        m_presetMap->setGeometry(screen->availableGeometry().adjusted(10,10,-20,-20));
+        m_presetMap->setGeometry(screen->availableGeometry().adjusted(200,200,-400,-400));
         m_presetMap->showFullScreen();
         showMap();
     }
@@ -224,6 +224,16 @@ void MainWindow::load(const QString &path,bool message)
         if(message)
             QMessageBox::warning(this,tr("can not open %0").arg(path),tr("can not open %0").arg(path));
     }
+}
+
+ControlArea *MainWindow::control() const
+{
+    return m_control;
+}
+
+MarkerList *MainWindow::marker() const
+{
+    return m_marker;
 }
 
 MapControl *MainWindow::presetMap() const

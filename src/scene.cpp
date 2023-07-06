@@ -9,8 +9,10 @@ Scene::Scene(const QString &path):m_path(path)
 {
     m_fogOfWarBrush=QBrush(QPixmap("./fogofwar.png"));
     m_curser=new QGraphicsEllipseItem(-8,-8,16,16);
+    (new QGraphicsEllipseItem(-16,-16,32,32,m_curser))->setPen(QPen(QColor(255,0,0,200),5,Qt::DashLine));
     addItem(m_linear);
-    m_curser->setBrush(QColor(255,0,0,100));
+    m_curser->setBrush(QColor(255,0,0,200));
+    m_curser->setPen(Qt::NoPen);
     addItem(m_curser);
     m_curser->setZValue(10000);
     m_linear->setZValue(10000);
@@ -104,22 +106,14 @@ void Scene::setLinearStart(const QPointF &position)
 {
     if(m_background->pixmap().isNull())
         return;
-    if(!sceneRect().contains(position))
-    {
-        m_linear->hide();
-        return;
-    }
     m_linear->setStartPoint(position);
     m_linear->show();
-    if(!sceneRect().contains(position))
-    {
-        m_linear->hide();
-    }
-    else
-    {
-        m_linear->show();
-    }
     invalidate(m_linear->boundingRect());
+}
+
+void Scene::hideLinear()
+{
+    m_linear->hide();
 }
 
 void Scene::setLinearEnd(const QPointF &position)
@@ -127,14 +121,6 @@ void Scene::setLinearEnd(const QPointF &position)
     if(m_background->pixmap().isNull())
         return;
     m_linear->setEndPoint(position);
-    if(!sceneRect().contains(position))
-    {
-        m_linear->hide();
-    }
-    else
-    {
-        m_linear->show();
-    }
     invalidate(m_linear->boundingRect());
 }
 

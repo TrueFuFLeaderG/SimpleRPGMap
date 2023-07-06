@@ -60,6 +60,7 @@ void MapItem::loadFromObj(const QJsonObject &obj)
 {
     m_name=obj.value("name").toString("Player");
     m_showName=obj.value("showName").toBool(true);
+    m_removeBackground=obj.value("removeBackground").toBool(true);
     m_labelSize=obj.value("labelSize").toDouble(16);
     m_img=obj.value("img").toString("marker2.png");
     m_color=obj.value("color").toString("");
@@ -79,6 +80,7 @@ QJsonObject MapItem::toObj()
 {
     QJsonObject obj;
     obj["name"]=m_name;
+    obj["removeBackground"]=m_removeBackground;
     obj["showName"]=m_showName;
     obj["labelSize"]=m_labelSize;
     obj["img"]=m_img;
@@ -213,6 +215,16 @@ void MapItem::setColor(const QString &newColor)
 {
     m_color = newColor;
 }
+
+bool MapItem::removeBackground() const
+{
+    return m_removeBackground;
+}
+
+void MapItem::setRemoveBackground(bool newRemoveBackground)
+{
+    m_removeBackground = newRemoveBackground;
+}
 MapItem *MapItem::createPresentItem()
 {
     MapItem* ret=new MapItem(toObj());
@@ -230,17 +242,26 @@ MapItem *MapItem::createPresentItem()
 
 void MapItem::reload()
 {
-    m_pixmapItem->setPixmap(createImage());
+    QPixmap img=createImage();
+    if(m_removeBackground)
+    {
+        img.setMask(QPixmap::fromImage(img.toImage().convertedTo(QImage::Format_Indexed8,Qt::ColorOnly|Qt::ThresholdDither)).createHeuristicMask());
+    }
+    m_pixmapItem->setPixmap(img);
     m_pixmapItem->setOffset(-m_pixmapItem->boundingRect().width()/2,-m_pixmapItem->boundingRect().height()/2);
     m_pixmapItem->setTransformationMode(Qt::SmoothTransformation);
     m_pixmapItem->setRotation(m_rotation);
-    m_textItem->setHtml("<p style=\"color: white;background-color:rgba(0, 0, 0, 0.8);\">"+m_name+"</p>");
+    m_textItem->setHtml("<p style=\"color: white;background-color:rgba(0, 0, 0, 0.8);\">&nbsp;"+m_name+"&nbsp;</p>");
 
     if(!m_color.isEmpty())
     {
         QGraphicsColorizeEffect* effect=new QGraphicsColorizeEffect;
         effect->setColor(QColor::fromString(m_color));
         m_pixmapItem->setGraphicsEffect(effect);
+    }
+    else
+    {
+        m_pixmapItem->setGraphicsEffect(0);
     }
 
     m_textItem->setFont(QFont("Arial",m_labelSize));

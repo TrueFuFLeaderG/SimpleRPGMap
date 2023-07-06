@@ -178,8 +178,7 @@ void MapControl::mouseReleaseEvent(QMouseEvent *event)
     if(event->button()==Qt::RightButton)
     {
 
-        scene()->setLinearStart(QPointF(-1,-1));
-        scene()->setLinearEnd(QPointF(-1,-1));
+        scene()->hideLinear();
     }
 
 }
