@@ -6,6 +6,7 @@
 Linear::Linear()
 {
 
+    setAcceptedMouseButtons(Qt::NoButton);
     m_line->setPen(QPen(QColor(255,0,0,100),10,Qt::DashLine));
     m_circle->setPen(QPen(QColor(255,0,0,100),5,Qt::DashLine));
     addToGroup(m_line);

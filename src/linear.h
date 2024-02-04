@@ -14,6 +14,7 @@ public:
     void setEndPoint(const QPointF& p);
     void updateText();
 private:
+
     QGraphicsLineItem* m_line=new QGraphicsLineItem;
     QGraphicsTextItem* m_text=new QGraphicsTextItem;
     QGraphicsEllipseItem* m_circle=new QGraphicsEllipseItem;

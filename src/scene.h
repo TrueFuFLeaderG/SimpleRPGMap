@@ -5,6 +5,7 @@
 #include <MapItem.h>
 #include <QGraphicsScene>
 #include <QObject>
+#include <ViewportItem.h>
 
 class Scene : public QGraphicsScene
 {
@@ -36,6 +37,8 @@ public:
     void setLinearStart(const QPointF &position);
     void hideLinear();
     void updateGrid();
+    ViewportItem *viewportItem() const;
+
 public slots:
     void updateScene();
 private:
@@ -55,6 +58,7 @@ protected:
     void timerEvent(QTimerEvent *event);
 private:
 
+    ViewportItem* m_viewportItem = new ViewportItem();
     Linear* m_linear=new Linear();
     QBrush m_fogOfWarBrush;
     QString m_path;

@@ -20,7 +20,8 @@ SOURCES += \
     mapshow.cpp \
     markerlist.cpp \
     markerproperties.cpp \
-    scene.cpp
+    scene.cpp \
+    viewportitem.cpp
 
 HEADERS += \
     controlarea.h \
@@ -33,7 +34,8 @@ HEADERS += \
     mapshow.h \
     markerlist.h \
     markerproperties.h \
-    scene.h
+    scene.h \
+    viewportitem.h
 
 TRANSLATIONS += \
     SimpleRPGMap_en_GB.ts

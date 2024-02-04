@@ -13,6 +13,8 @@ MapControl::MapControl(const QString &path, bool present):m_path(path),m_present
         setDragMode(ScrollHandDrag);
         setTransformationAnchor(QGraphicsView::AnchorViewCenter);
         setResizeAnchor(QGraphicsView::AnchorViewCenter);
+        setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
     else
     {
@@ -29,19 +31,40 @@ void MapControl::hideScene()
 void MapControl::syncScene(MapControl *other)
 {
     if(other)
+    {
+
         m_scene->syncScene(other->scene());
+        m_path=other->m_path;
+
+
+
+        resetTransform();
+        double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
+        double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
+        scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+        scale(other->m_scene->width()/other->m_scene->viewportItem()->width(),
+                  other-> m_scene->height()/other->m_scene->viewportItem()->height());
+        centerOn(QPointF(other->m_scene->viewportItem()->pos().x()+other->m_scene->viewportItem()->width()/2,
+                       other->m_scene->viewportItem()->pos().y()+other->m_scene->viewportItem()->height()/2));
+
+
+
+    }
+
     else
         m_scene->syncScene(0);
 
-    resetTransform();
-    double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
-    double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
-    scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+
+
+
+
 
 }
 
 void MapControl::dragEnterEvent(QDragEnterEvent *event)
 {
+    if(m_present)
+        return;
     QGraphicsView::dragEnterEvent(event);
     const QMimeData* data=event->mimeData();
     if(data->hasFormat("application/x-qabstractitemmodeldatalist"))
@@ -50,6 +73,8 @@ void MapControl::dragEnterEvent(QDragEnterEvent *event)
 
 void MapControl::dragMoveEvent(QDragMoveEvent *event)
 {
+    if(m_present)
+        return;
     QGraphicsView::dragMoveEvent(event);
     const QMimeData* data=event->mimeData();
     if(data->hasFormat("application/x-qabstractitemmodeldatalist"))
@@ -58,11 +83,15 @@ void MapControl::dragMoveEvent(QDragMoveEvent *event)
 
 void MapControl::dragLeaveEvent(QDragLeaveEvent *event)
 {
+    if(m_present)
+        return;
     QGraphicsView::dragLeaveEvent(event);
 }
 
 void MapControl::dropEvent(QDropEvent *event)
 {
+    if(m_present)
+        return;
     QGraphicsView::dropEvent(event);
     const QMimeData* data=event->mimeData();
     QByteArray encoded = data->data("application/x-qabstractitemmodeldatalist");
@@ -99,6 +128,15 @@ QString MapControl::path() const
 
 void MapControl::keyReleaseEvent(QKeyEvent *event)
 {
+    if(event->key()==Qt::Key_Return&& (event->modifiers()&Qt::AltModifier))
+    {
+        if(isFullScreen())
+            showNormal();
+        else
+            showFullScreen();
+    }
+    if(m_present)
+        return;
     QGraphicsView::keyReleaseEvent(event);
     if(event->text()=="0")
     {
@@ -108,18 +146,13 @@ void MapControl::keyReleaseEvent(QKeyEvent *event)
     {
         MainWindow::mainWindow()->markerProperties()->deleteCurrentItem();
     }
-    if(event->key()==Qt::Key_Return&& (event->modifiers()&Qt::AltModifier))
-    {
-        if(isFullScreen())
-            showNormal();
-        else
-            showFullScreen();
-    }
 }
 
 
 void MapControl::leaveEvent(QEvent *event)
 {
+    if(m_present)
+        return;
 
     QGraphicsView::leaveEvent(event);
     MapControl* map=MainWindow::mainWindow()->presetMap();
@@ -130,19 +163,25 @@ void MapControl::leaveEvent(QEvent *event)
 void MapControl::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
-    if(m_path=="")
-    {
 
+/*
         resetTransform();
         double ratioW=size().width()/(double)m_scene->background()->pixmap().width();
         double ratioH=size().height()/(double)m_scene->background()->pixmap().height();
         scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
-    }
+        scale((double)m_scene->background()->pixmap().width()/m_scene->viewportItem()->width(),
+              (double)m_scene->background()->pixmap().height()/m_scene->viewportItem()->height());
+        centerOn(QPointF(m_scene->viewportItem()->pos().x()+m_scene->viewportItem()->width()/2,
+                       m_scene->viewportItem()->pos().y()+m_scene->viewportItem()->height()/2));
+                       */
+
 
 }
 
 void MapControl::mousePressEvent(QMouseEvent *event)
 {
+    if(m_present)
+        return;
     QGraphicsView::mousePressEvent(event);
     MapControl* map=MainWindow::mainWindow()->presetMap();
     if(map)
@@ -163,6 +202,8 @@ void MapControl::mousePressEvent(QMouseEvent *event)
 
 void MapControl::mouseReleaseEvent(QMouseEvent *event)
 {
+    if(m_present)
+        return;
     QGraphicsView::mouseReleaseEvent(event);
     MapControl* map=MainWindow::mainWindow()->presetMap();
     if(map)
@@ -183,13 +224,17 @@ void MapControl::mouseReleaseEvent(QMouseEvent *event)
 
 }
 
+
 void MapControl::mouseMoveEvent(QMouseEvent *event)
 {
 
+    if(m_present)
+        return;
 
     QGraphicsView::mouseMoveEvent(event);
     MapControl* map=MainWindow::mainWindow()->presetMap();
-    if(map)
+
+    if(map&&map->m_path==m_path)
     {
         if(event->buttons()&Qt::RightButton)
         {
@@ -198,6 +243,21 @@ void MapControl::mouseMoveEvent(QMouseEvent *event)
         else
         {
             map->scene()->setCursorPos( mapToScene(event->pos()));
+        }
+        if(event->buttons()&Qt::LeftButton)
+        {
+
+
+
+            map->resetTransform();
+            double ratioW=map->size().width()/(double)map->m_scene->background()->pixmap().width();
+            double ratioH=map->size().height()/(double)map->m_scene->background()->pixmap().height();
+            map->scale(qMin(ratioH,ratioW),qMin(ratioH,ratioW));
+            map->scale(m_scene->width()/m_scene->viewportItem()->width(),
+                       m_scene->height()/m_scene->viewportItem()->height());
+            map->centerOn(QPointF(m_scene->viewportItem()->pos().x()+m_scene->viewportItem()->width()/2,
+                           m_scene->viewportItem()->pos().y()+m_scene->viewportItem()->height()/2));
+
         }
     }
     if(event->buttons()&Qt::RightButton)

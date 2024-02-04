@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_toolBar->addWidget(m_box);
     updatePreviewOptions();
     QAction* showCurrentMap=m_toolBar->addAction(QIcon(),tr("Show Current Map"));
+
+    connect(m_toolBar->addAction(QIcon(),tr("Toggle Fullscreen")),&QAction::triggered,this,&MainWindow::toggleFullscreen);
     connect(showCurrentMap,&QAction::triggered,this,&MainWindow::showMap);
     QAction* hideMap= m_toolBar->addAction(QIcon(),tr("Hide Map"));
     connect(hideMap,&QAction::triggered,this,&MainWindow::hideMap);
@@ -78,7 +80,7 @@ void MainWindow::setPresetScreen(int index)
     {
 
         m_presetMap=new MapControl("",true);
-        m_presetMap->setWindowFlags(Qt::Window | Qt::WindowFullscreenButtonHint| Qt::WindowMaximizeButtonHint);
+        m_presetMap->setWindowFlags(Qt::Window |Qt::CustomizeWindowHint|Qt::WindowTitleHint);
         m_presetMap->setLineWidth(0);
         m_presetMap->setFrameStyle(QFrame::NoFrame);
         m_presetMap->show();
@@ -117,6 +119,16 @@ void MainWindow::showMap()
     if(m_presetMap==0)
         return;
     m_presetMap->syncScene(m_control->currentMapControl());
+}
+
+void MainWindow::toggleFullscreen()
+{
+    if(m_presetMap==0)
+        return;
+    if(m_presetMap->isFullScreen())
+        m_presetMap->showNormal();
+    else
+       m_presetMap->showFullScreen();
 }
 
 void MainWindow::upateSettings()
@@ -159,6 +171,10 @@ void MainWindow::save(const QString &path)
         object["showFogOfWar"]=control->scene()->showFogOfWar();
         object["gridXOffset"]=control->scene()->gridXOffset();
         object["gridYOffset"]=control->scene()->gridYOffset();
+        object["vx"]=control->scene()->viewportItem()->x();
+        object["vy"]=control->scene()->viewportItem()->y();
+        object["vw"]=control->scene()->viewportItem()->width();
+        object["vh"]=control->scene()->viewportItem()->height();
         QList<MapItem *>  obj=control->scene()->mapItems();
         QJsonArray objects;
         for(int j=0;j<obj.size();j++)
@@ -206,6 +222,14 @@ void MainWindow::load(const QString &path,bool message)
             control->scene()->setShowFogOfWar(object["showFogOfWar"].toBool());
             control->scene()->setGridXOffset(object["gridXOffset"].toInt());
             control->scene()->setGridYOffset(object["gridYOffset"].toInt());
+
+            double vx =object["vx"].toDouble();
+            double vy =object["vy"].toDouble();
+            double vw =object["vw"].toDouble();
+            double vh =object["vh"].toDouble();
+            if(vw!=0.&&vh!=0.)
+                control->scene()->viewportItem()->setRect(vx,vy,vw,vh);
+
             QJsonArray array=object["objects"].toArray();
             for(int j=0;j<array.size();j++)
             {

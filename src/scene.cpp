@@ -11,11 +11,14 @@ Scene::Scene(const QString &path):m_path(path)
     m_curser=new QGraphicsEllipseItem(-8,-8,16,16);
     (new QGraphicsEllipseItem(-16,-16,32,32,m_curser))->setPen(QPen(QColor(255,0,0,200),5,Qt::DashLine));
     addItem(m_linear);
+    addItem(m_viewportItem);
+    m_curser->setAcceptedMouseButtons(Qt::NoButton);
     m_curser->setBrush(QColor(255,0,0,200));
     m_curser->setPen(Qt::NoPen);
     addItem(m_curser);
     m_curser->setZValue(10000);
     m_linear->setZValue(10000);
+    m_viewportItem->setZValue(9000);
     m_curser->hide();
     m_linear->hide();
     m_grid=new QGraphicsPixmapItem;
@@ -38,9 +41,12 @@ Scene::Scene(const QString &path):m_path(path)
         m_fogOfWar=new QGraphicsPixmapItem(m_baseFogOfWar);
         m_fogOfWar->setOpacity(m_fogOfWarOpaque);
         addItem(m_fogOfWar);
+
+        m_viewportItem->setRect(0,0,1920,1080);
     }
     else
     {
+        m_viewportItem->hide();
         m_baseFogOfWar=QPixmap(16,16);
         m_baseFogOfWar.fill( Qt::transparent);
         m_fogOfWar=new QGraphicsPixmapItem(m_baseFogOfWar);
@@ -152,6 +158,10 @@ void Scene::updateNow()
     {
         removeItem(m_mapItems[i]);
     }
+    m_viewportItem->setRect(m_otherScene->m_viewportItem->x(),
+                            m_otherScene->m_viewportItem->y(),
+                            m_otherScene->m_viewportItem->width(),
+                            m_otherScene->m_viewportItem->height());
     m_mapItems.clear();
     if(!m_otherScene)
     {
@@ -295,6 +305,11 @@ void Scene::timerEvent(QTimerEvent *event)
         return;
     m_dirty=false;
     updateNow();
+}
+
+ViewportItem *Scene::viewportItem() const
+{
+    return m_viewportItem;
 }
 
 QList<MapItem *> Scene::mapItems() const

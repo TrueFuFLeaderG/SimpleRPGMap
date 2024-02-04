@@ -36,6 +36,7 @@ private:
     bool m_present=false;
 
 
+
 };
 
 #endif // MAPCONTROL_H

@@ -53,7 +53,7 @@
                 "rotation": 0,
                 "showName": false,
                 "x": 620,
-                "y": 805
+                "y": 803
             },
             {
                 "aspectratio": 1,
@@ -69,8 +69,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 983.8612261483887,
-                "y": 505.0043743632358
+                "x": 939.6737508758854,
+                "y": 429.0199313626196
             },
             {
                 "aspectratio": 1,
@@ -86,25 +86,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 468,
-                "y": 439
-            },
-            {
-                "aspectratio": 1,
-                "color": "DarkRed",
-                "img": "Enemy.png",
-                "labelSize": 16,
-                "light": "",
-                "lightAspectratio": 1,
-                "lightRadius": 0,
-                "lightRotation": 0,
-                "name": "Enemy",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 488,
-                "y": 570
+                "x": 428.1035633889128,
+                "y": 475.02999249631864
             },
             {
                 "aspectratio": 1,
@@ -126,40 +109,6 @@
             {
                 "aspectratio": 1,
                 "color": "",
-                "img": "Ranger.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Ranger",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 809,
-                "y": 368
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Rogue.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Rogue",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 794,
-                "y": 455
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
                 "img": "",
                 "labelSize": 16,
                 "light": "circleSmoother.png",
@@ -173,23 +122,6 @@
                 "showName": false,
                 "x": 764,
                 "y": 666
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "7c5642fb-ad6e-49a1-a33c-c963d2f70eb0.jpg",
-                "labelSize": 16,
-                "light": "",
-                "lightAspectratio": 1,
-                "lightRadius": 0,
-                "lightRotation": 0,
-                "name": "NPC",
-                "radius": 161,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 323,
-                "y": 399
             },
             {
                 "aspectratio": 1,
@@ -239,110 +171,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 673.3244168506635,
-                "y": 416.6261545175264
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Bard.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 581.3244168506635,
-                "y": 557.6261545175264
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Bard.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 719.3244168506635,
-                "y": 429.6261545175264
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Bard.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 586.3244168506635,
-                "y": 562.6261545175264
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Bard.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 591.3244168506635,
-                "y": 567.6261545175264
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Bard.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 596.3244168506635,
-                "y": 572.6261545175264
-            },
-            {
-                "aspectratio": 1,
-                "color": "",
-                "img": "Bard.png",
-                "labelSize": 16,
-                "light": "circleSmoother.png",
-                "lightAspectratio": 1,
-                "lightRadius": 400,
-                "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
-                "removeBackground": true,
-                "rotation": 0,
-                "showName": true,
-                "x": 568.1400869728438,
-                "y": 501.04693172255793
+                "x": 589.400674821727,
+                "y": 476.4838975443559
             },
             {
                 "aspectratio": 1,
@@ -596,8 +426,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 973.988899743036,
-                "y": 542.9838210548997
+                "x": 941.988899743036,
+                "y": 618.9838210548996
             },
             {
                 "aspectratio": 1,
@@ -613,8 +443,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 1007.2989917594766,
-                "y": 517.6515796087136
+                "x": 900.2989917594766,
+                "y": 519.6515796087136
             },
             {
                 "aspectratio": 1,
@@ -647,8 +477,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 974.8338537348158,
-                "y": 447.7766771337565
+                "x": 898.1634651984245,
+                "y": 283.48298741291836
             },
             {
                 "aspectratio": 1,
@@ -698,8 +528,8 @@
                 "removeBackground": true,
                 "rotation": 0,
                 "showName": true,
-                "x": 907.9368018301128,
-                "y": 541.6405048938407
+                "x": 883.9368018301129,
+                "y": 516.6405048938407
             },
             {
                 "aspectratio": 1,
@@ -872,24 +702,84 @@
                 "y": 622.9838210548997
             },
             {
-                "aspectratio": 5,
+                "aspectratio": 1,
                 "color": "",
-                "img": "Bard.png",
+                "img": "",
                 "labelSize": 16,
-                "light": "rectangleSmoother.png",
+                "light": "circleSmoother.png",
                 "lightAspectratio": 1,
-                "lightRadius": 393,
+                "lightRadius": 256,
                 "lightRotation": 0,
-                "name": "Bard",
-                "radius": 32,
+                "name": "RoundLight",
+                "radius": 80,
                 "removeBackground": true,
                 "rotation": 0,
-                "showName": true,
-                "x": 1058.988899743036,
-                "y": 627.9838210548997
+                "showName": false,
+                "x": 458,
+                "y": 381
             }
         ],
         "path": "C:/Develop/RPG/SimpleRPGMap/SimpleRPGMap/resources/maps/mine.bmp",
-        "showFogOfWar": true
+        "showFogOfWar": true,
+        "vh": 329.06249999999983,
+        "vw": 584.9999999999997,
+        "vx": 162,
+        "vy": 251
+    },
+    {
+        "gridSize": 32,
+        "gridXOffset": 0,
+        "gridYOffset": 0,
+        "objects": [
+            {
+                "aspectratio": 1,
+                "color": "",
+                "img": "",
+                "labelSize": 16,
+                "light": "circleSmoother.png",
+                "lightAspectratio": 1,
+                "lightRadius": 256,
+                "lightRotation": 0,
+                "name": "RoundLight",
+                "radius": 80,
+                "removeBackground": true,
+                "rotation": 0,
+                "showName": false,
+                "x": 560,
+                "y": 412
+            }
+        ],
+        "path": "C:/Develop/RPG/SimpleRPGMap/SimpleRPGMap/resources/maps/test.png",
+        "showFogOfWar": true,
+        "vh": 1080,
+        "vw": 1920,
+        "vx": 0,
+        "vy": 0
+    },
+    {
+        "gridSize": 32,
+        "gridXOffset": 0,
+        "gridYOffset": 0,
+        "objects": [
+        ],
+        "path": "C:/Develop/RPG/SimpleRPGMap/SimpleRPGMap/resources/maps/adelshaus.png",
+        "showFogOfWar": true,
+        "vh": 1080,
+        "vw": 1920,
+        "vx": 0,
+        "vy": 0
+    },
+    {
+        "gridSize": 32,
+        "gridXOffset": 0,
+        "gridYOffset": 0,
+        "objects": [
+        ],
+        "path": "C:/Develop/RPG/SimpleRPGMap/SimpleRPGMap/resources/maps/dorf.png",
+        "showFogOfWar": true,
+        "vh": 275.4999999999995,
+        "vw": 489.77777777777686,
+        "vx": 272,
+        "vy": 262
     }
 ]

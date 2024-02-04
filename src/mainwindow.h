@@ -30,6 +30,7 @@ public slots:
     void setPresetScreen(int index);
     void openMap(const QModelIndex& model);
     void showMap();
+    void toggleFullscreen();
     void upateSettings();
     void loadState();
     void saveState();
