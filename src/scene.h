@@ -1,6 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "wallitem.h"
 #include <Linear.h>
 #include <MapItem.h>
 #include <QGraphicsScene>
@@ -39,12 +40,23 @@ public:
     void updateGrid();
     ViewportItem *viewportItem() const;
 
+    bool drawWallsMode() const;
+    void setDrawWallsMode(bool newDrawWallsMode);
+    void deleteWall(WallItem* item);
+
+    QList<WallItem *> walls() const;
+
+    void addWall(double x1, double y1, const QList<QPointF> &points);
+    double scale() const;
+    void setScale(double newScale);
+
 public slots:
     void updateScene();
 private:
     void updateNow();
     bool m_dirty=false;
     bool m_showFogOfWar=true;
+    double m_scale=1;
     int m_gridSize=32;
     int m_gridXOffset=0;
     int m_gridYOffset=0;
@@ -71,7 +83,22 @@ private:
     bool m_hide=false;
     Scene* m_otherScene=0;
 
+    enum DrawMode
+    {
+        NoDraw,
+        DrawingPlacing,
+        DrawingMoving
+    };
 
+    DrawMode m_drawWallsMode=NoDraw;
+    WallItem* m_floatingWalls=0;
+    QList<WallItem*> m_walls;
+
+    // QGraphicsScene interface
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 };
 
 #endif // SCENE_H

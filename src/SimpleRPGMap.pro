@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,7 +21,9 @@ SOURCES += \
     markerlist.cpp \
     markerproperties.cpp \
     scene.cpp \
-    viewportitem.cpp
+    soundlist.cpp \
+    viewportitem.cpp \
+    wallitem.cpp
 
 HEADERS += \
     controlarea.h \
@@ -35,7 +37,9 @@ HEADERS += \
     markerlist.h \
     markerproperties.h \
     scene.h \
-    viewportitem.h
+    soundlist.h \
+    viewportitem.h \
+    wallitem.h
 
 TRANSLATIONS += \
     SimpleRPGMap_en_GB.ts

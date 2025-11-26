@@ -144,6 +144,25 @@ void MapControl::keyReleaseEvent(QKeyEvent *event)
     }
     if(event->key()==Qt::Key_Delete||event->key()==Qt::Key_Backspace)
     {
+        MapControl* control=MainWindow::mainWindow()->control()->currentMapControl();
+        if(control)
+        {
+            QList<QGraphicsItem *> selected=control->scene()->selectedItems();
+            if(selected.size()>0)
+            {
+                QGraphicsItem* item= selected.first();
+                if(item->type()==WallEnd::Type)
+                {
+                    control->scene()->deleteWall(((WallEnd*)item)->wall());
+                    return;
+                }
+                else if (item->type()==WallItem::Type)
+                {
+                    control->scene()->deleteWall((WallItem*)item);
+                    return;
+                }
+            }
+        }
         MainWindow::mainWindow()->markerProperties()->deleteCurrentItem();
     }
 }

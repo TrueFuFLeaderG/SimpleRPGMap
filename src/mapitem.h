@@ -5,6 +5,7 @@
 #include <QGraphicsTextItem>
 #include <QPixmap>
 
+class ScaleItem;
 class MapItem : public QGraphicsItem
 {
 public:
@@ -64,6 +65,17 @@ public:
     bool removeBackground() const;
     void setRemoveBackground(bool newRemoveBackground);
 
+
+
+    QString notes() const;
+    void setNotes(const QString &newNotes);
+
+    bool blockLight() const;
+    void setBlockLight(bool newBlockLight);
+
+    bool present() const;
+
+    bool scaleable();
 signals:
     void nameChanged();
 
@@ -82,15 +94,43 @@ private:
     double m_lightRadius=16;
     double m_lightAspectratio=1;
     double m_lightRotation=0;
-
+    QString m_notes;
+    bool m_blockLight=true;
     bool m_present=false;
 
     QGraphicsPixmapItem* m_pixmapItem;
     QGraphicsTextItem* m_textItem;
+    ScaleItem* m_scalItem=0;
+
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 };
 
+class ScaleItem : public QGraphicsItem
+{
+public:
+    ScaleItem(MapItem* item);
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    void updatePos();
+
+
+private:
+    bool m_state=false;
+    double m_penWidth=2;
+
+    QRectF m_scaleRect=QRectF(0,0,24,24);
+    MapItem* m_item;
+    // QGraphicsItem interface
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+};
 #endif // MAPITEM_H

@@ -7,6 +7,7 @@
 #include <QIcon>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLabel>
 #include <QPushButton>
 #include <qdir.h>
 
@@ -207,6 +208,9 @@ MarkerProperties::MarkerProperties()
     layout->addRow(tr("Light aspect ratio"),m_lightAspectratio);
     layout->addRow(tr("Light rotation"),m_lightRotation);
     layout->addRow(tr("Light rotation"),m_lightRotation);
+    //layout->addRow(tr("Block light"),m_blockLight);
+    layout->addRow(new QLabel(tr("Notes")));
+    layout->addRow(m_noteEdit);
 
     QPushButton* button3=new QPushButton(tr("Duplicate item"));
     layout->addRow(button3);
@@ -217,7 +221,6 @@ MarkerProperties::MarkerProperties()
     connect(button3,&QPushButton::clicked,this,&MarkerProperties::duplicateCurrentItem);
     connect(button2,&QPushButton::clicked,this,&MarkerProperties::saveCurrentItem);
     connect(button,&QPushButton::clicked,this,&MarkerProperties::deleteCurrentItem);
-    connect(m_name,&QLineEdit::textChanged,this,&MarkerProperties::updateItem);
     connect(m_name,&QLineEdit::textChanged,this,&MarkerProperties::updateItem);
     connect(m_removeBackground,&QCheckBox::stateChanged,this,&MarkerProperties::updateItem);
     connect(m_showName,&QCheckBox::stateChanged,this,&MarkerProperties::updateItem);
@@ -231,8 +234,11 @@ MarkerProperties::MarkerProperties()
     connect(m_lightRadius,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_lightAspectratio,&QDoubleSpinBox::valueChanged,this,&MarkerProperties::updateItem);
     connect(m_lightRotation,&QSlider::valueChanged,this,&MarkerProperties::updateItem);
+    connect(m_blockLight,&QCheckBox::stateChanged,this,&MarkerProperties::updateItem);
+    connect(m_noteEdit,&QPlainTextEdit::textChanged,this,&MarkerProperties::updateItem);
 
     setDisabled(true);
+    startTimer(500);
 }
 
 void MarkerProperties::focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem */*oldFocusItem*/, Qt::FocusReason /*reason*/)
@@ -255,6 +261,9 @@ void MarkerProperties::focusChanged(QGraphicsItem *newFocusItem, QGraphicsItem *
         m_lightAspectratio->setValue(nextItem->lightAspectratio());
         m_lightRotation->setValue(nextItem->lightRotation());
         m_color->setCurrentText(nextItem->color());
+        m_noteEdit->clear();
+        m_noteEdit->insertPlainText(nextItem->notes());
+        m_blockLight->setChecked(nextItem->blockLight());
         m_currentItem=nextItem;
     }
 }
@@ -276,6 +285,8 @@ void MarkerProperties::updateItem()
     m_currentItem->setLightAspectratio(m_lightAspectratio->value());
     m_currentItem->setLightRotation(m_lightRotation->value());
     m_currentItem->setColor(m_color->currentText());
+    m_currentItem->setNotes(m_noteEdit->toPlainText());
+    m_currentItem->setBlockLight(m_blockLight->isChecked());
     m_currentItem->reload();
 
 }
@@ -293,6 +304,15 @@ void MarkerProperties::duplicateCurrentItem()
     scene->clearSelection();
     newMarker->setSelected(true);
     scene->setFocusItem(newMarker,Qt::MouseFocusReason);
+}
+
+void MarkerProperties::timerEvent(QTimerEvent *event)
+{
+    if(m_currentItem)
+    {
+        if(m_radius->value()!=m_currentItem->radius())
+            m_radius->setValue(m_currentItem->radius());
+    }
 }
 void MarkerProperties::saveCurrentItem()
 {

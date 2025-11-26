@@ -18,6 +18,7 @@ public:
 
     QString path() const;
 
+
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);

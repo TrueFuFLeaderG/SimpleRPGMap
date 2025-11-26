@@ -63,8 +63,7 @@ CMakeLists.txt.user*
 # MinGW generated files
 *.Debug
 *.Release
-*.src/.qtcreator
-*.src/build
+*.src/.qtcreator 
 
 # Python byte code
 *.pyc

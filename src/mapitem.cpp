@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QGraphicsColorizeEffect>
+#include <QGraphicsSceneMouseEvent>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -13,6 +14,7 @@ MapItem::MapItem(const QString &path)
 
     m_pixmapItem=new QGraphicsPixmapItem(this);
     m_textItem= new QGraphicsTextItem(this);
+    m_scalItem=new ScaleItem(this);
     setVisible(true);
     setFlag(QGraphicsItem::ItemIsSelectable,true);
     setFlag(QGraphicsItem::ItemIsMovable,true);
@@ -26,6 +28,7 @@ MapItem::MapItem(const QJsonObject &path)
 
     m_pixmapItem=new QGraphicsPixmapItem(this);
     m_textItem= new QGraphicsTextItem(this);
+    m_scalItem=new ScaleItem(this);
     setVisible(true);
     setFlag(QGraphicsItem::ItemIsSelectable,true);
     setFlag(QGraphicsItem::ItemIsMovable,true);
@@ -71,6 +74,8 @@ void MapItem::loadFromObj(const QJsonObject &obj)
     m_lightRadius=obj.value("lightRadius").toDouble(16);
     m_lightAspectratio=obj.value("lightAspectratio").toDouble(1);
     m_lightRotation=obj.value("lightRotation").toDouble(0);
+    m_notes=obj.value("notes").toString();
+    m_blockLight = obj.value("blockLight").toBool(false);
     setX(obj.value("x").toDouble());
     setY(obj.value("y").toDouble());
 
@@ -91,6 +96,8 @@ QJsonObject MapItem::toObj()
     obj["lightRadius"]=m_lightRadius;
     obj["lightAspectratio"]=m_lightAspectratio;
     obj["lightRotation"]=m_lightRotation;
+    obj["notes"] = m_notes;
+    obj["blockLight"] = m_blockLight;
     obj["color"]=m_color;
     obj["x"]=x();
     obj["y"]=y();
@@ -225,6 +232,36 @@ void MapItem::setRemoveBackground(bool newRemoveBackground)
 {
     m_removeBackground = newRemoveBackground;
 }
+
+QString MapItem::notes() const
+{
+    return m_notes;
+}
+
+void MapItem::setNotes(const QString &newNotes)
+{
+    m_notes = newNotes;
+}
+
+bool MapItem::blockLight() const
+{
+    return m_blockLight;
+}
+
+void MapItem::setBlockLight(bool newBlockLight)
+{
+    m_blockLight = newBlockLight;
+}
+
+bool MapItem::present() const
+{
+    return m_present;
+}
+
+bool MapItem::scaleable()
+{
+    return !m_img.isEmpty();
+}
 MapItem *MapItem::createPresentItem()
 {
     MapItem* ret=new MapItem(toObj());
@@ -272,6 +309,8 @@ void MapItem::reload()
     Scene* currentScene= qobject_cast<Scene*>(scene());
     if(currentScene)
         currentScene->updateFogOfWar();
+    m_scalItem->updatePos();
+    m_scalItem->update();
 }
 
 QPixmap MapItem::createLight()
@@ -313,7 +352,7 @@ QRectF MapItem::boundingRect() const
  return childrenBoundingRect();
 }
 
-void MapItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void MapItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     if(m_present)
         return;
@@ -340,4 +379,112 @@ QVariant MapItem::itemChange(GraphicsItemChange change, const QVariant &value)
            currentScene->updateFogOfWar();
     }
     return value;
+}
+
+ScaleItem::ScaleItem(MapItem *item):QGraphicsItem(item)
+{
+    setZValue(1000);
+    m_item=item;
+    setAcceptHoverEvents(true);
+    setAcceptedMouseButtons(Qt::LeftButton);
+    updatePos();
+}
+
+QRectF ScaleItem::boundingRect() const
+{
+    return QRectF(-1,-1,m_scaleRect.width()+m_penWidth*2,m_scaleRect.height()+m_penWidth*2);
+}
+void ScaleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    if(m_item->present() || !m_item->scaleable())
+        return;
+
+    if(m_state)
+        painter->setBrush(QBrush(Qt::red));
+    else
+        painter->setBrush(QBrush(Qt::gray));
+
+    painter->drawEllipse(m_scaleRect);
+
+
+    painter->drawLine(m_scaleRect.x()+(m_scaleRect.width()/4.)+1,
+                      m_scaleRect.y()+(m_scaleRect.height()/4.)+1,
+                      m_scaleRect.x()+(m_scaleRect.width()*(3./4.))-1,
+                      m_scaleRect.y()+(m_scaleRect.height()*(3./4.))-1);
+
+    painter->drawLine(m_scaleRect.x()+(m_scaleRect.width()/4.), m_scaleRect.y()+(m_scaleRect.height()/4.),m_scaleRect.x()+(m_scaleRect.width()/4.)+3, m_scaleRect.y()+(m_scaleRect.height()/4.));
+    painter->drawLine(m_scaleRect.x()+(m_scaleRect.width()/4.), m_scaleRect.y()+(m_scaleRect.height()/4.),m_scaleRect.x()+(m_scaleRect.width()/4.), m_scaleRect.y()+(m_scaleRect.height()/4.)+3);
+
+    painter->drawLine(m_scaleRect.x()+(m_scaleRect.width()*(3./4.)),m_scaleRect.y()+(m_scaleRect.height()*(3./4.)),m_scaleRect.x()+(m_scaleRect.width()*(3./4.))-3,m_scaleRect.y()+(m_scaleRect.height()*(3./4.)));
+    painter->drawLine(m_scaleRect.x()+(m_scaleRect.width()*(3./4.)),m_scaleRect.y()+(m_scaleRect.height()*(3./4.)),m_scaleRect.x()+(m_scaleRect.width()*(3./4.)),m_scaleRect.y()+(m_scaleRect.height()*(3./4.))-3);
+
+}
+
+void ScaleItem::updatePos()
+{
+    setPos(m_item->boundingRect().height()/-2,m_item->boundingRect().width()/-2);
+}
+
+
+
+void ScaleItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if(m_item->present() || !m_item->scaleable())
+        return;
+    m_state=true;
+}
+
+void ScaleItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+
+    if(m_item->present() || !m_item->scaleable())
+        return;
+    QPointF delta=event->lastPos()-event->pos();
+    if(m_state)
+    {
+        prepareGeometryChange();
+        if(qAbs( delta.x())>qAbs(delta.y()))
+        {
+            m_item->setRadius(m_item->radius()+delta.x());
+        }
+        else
+        {
+            m_item->setRadius(m_item->radius()+delta.y());
+        }
+        if(m_item->radius()<1)
+            m_item->setRadius(1);
+        m_item->reload();
+        scene()->setFocusItem(m_item,Qt::OtherFocusReason);
+        updatePos();
+    }
+
+    QGraphicsItem::mouseMoveEvent(event);
+}
+
+void ScaleItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if(m_item->present() || !m_item->scaleable())
+        return;
+    m_state=false;
+    update();
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+
+void ScaleItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+
+    if(m_item->present() || !m_item->scaleable())
+        return;
+    m_state=false;
+    update();
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void ScaleItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    if(m_item->present() || !m_item->scaleable())
+        return;
+
+    m_state=false;
+    QGraphicsItem::hoverLeaveEvent(event);
 }

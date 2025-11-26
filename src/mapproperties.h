@@ -3,6 +3,7 @@
 
 #include <QCheckBox>
 #include <QDoubleSpinBox>
+#include <QPushButton>
 #include <QWidget>
 #include <Scene.h>
 
@@ -23,8 +24,9 @@ private:
     QDoubleSpinBox* m_gridXOffset=new QDoubleSpinBox;
     QDoubleSpinBox* m_gridYOffset=new QDoubleSpinBox;
     QCheckBox* m_showFogOfWar=new QCheckBox;
+    QPushButton* m_drawWalls=new QPushButton(tr("Draw walls (hold shift polygons)"));
 
-    Scene* m_scene;
+    Scene* m_scene=0;
 
 };
 

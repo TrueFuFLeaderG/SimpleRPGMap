@@ -3,6 +3,7 @@
 #include <MapItem.h>
 #include <QGraphicsPixmapItem>
 #include <QPainter>
+#include <qgraphicssceneevent.h>
 #include <qgraphicsview.h>
 
 Scene::Scene(const QString &path):m_path(path)
@@ -60,7 +61,155 @@ Scene::Scene(const QString &path):m_path(path)
     updateFogOfWar();
     startTimer(30);
 }
+#include <algorithm>
+#include <cmath>
 
+// Helper struct for sorting
+struct RayPoint {
+    QPointF point;
+    double angle;
+    bool operator<(const RayPoint& other) const {
+        return angle < other.angle;
+    }
+};
+
+QPolygonF calculateVisibilityPolygon(QPointF lightCenter, double radius, const QVector<QLineF>& walls) {
+    QVector<RayPoint> rayPoints;
+
+    // 1. Collect all unique angles we need to cast rays towards
+    // We need the endpoints of every wall
+    for (const QLineF& wall : walls) {
+        QPointF p1 = wall.p1();
+        QPointF p2 = wall.p2();
+
+        // Add rays for p1 and p2
+        // NOTE: Ideally, you add +/- tiny epsilon offsets to hit JUST behind the wall
+        double angle1 = std::atan2(p1.y() - lightCenter.y(), p1.x() - lightCenter.x());
+        double angle2 = std::atan2(p2.y() - lightCenter.y(), p2.x() - lightCenter.x());
+
+        rayPoints.append({p1, angle1});
+        rayPoints.append({p2, angle2});
+
+        // Add the +/- epsilon rays here (omitted for brevity, but crucial for quality)
+        // These help you see "past" a corner
+    }
+
+    // Also add corners of the screen or bounding box if necessary so the light has a 'container'
+
+    // 2. Sort rays by angle
+    std::sort(rayPoints.begin(), rayPoints.end());
+
+    QPolygonF visibilityPoly;
+
+    // 3. Cast rays
+    for (const auto& rp : rayPoints) {
+        QLineF ray(lightCenter, lightCenter + QPointF(std::cos(rp.angle), std::sin(rp.angle)) * radius * 2); // Long ray
+
+        QPointF closestHit;
+        double closestDist = std::numeric_limits<double>::max();
+
+        // Check intersection against ALL walls
+        for (const QLineF& wall : walls) {
+            QPointF intersection;
+            // QLineF::BoundedIntersection checks strictly within the wall segment
+            if (wall.intersects(ray, &intersection) == QLineF::BoundedIntersection) {
+                double dist = QLineF(lightCenter, intersection).length();
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestHit = intersection;
+                }
+            }
+        }
+
+        if (closestDist < std::numeric_limits<double>::max()) {
+            visibilityPoly << closestHit;
+        } else {
+             // If we hit nothing, the light goes to the max radius
+             visibilityPoly << ray.p2();
+        }
+    }
+
+    return visibilityPoly;
+}
+void Scene::updateFogOfWar()
+{
+    QPainter painter;
+    QPixmap pixmap = m_baseFogOfWar;
+    if (pixmap.isNull()) return;
+
+    painter.begin(&pixmap);
+    painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing);
+
+    // 1. Get all walls from your scene (pseudo-code)
+    QVector<QLineF> allWalls;
+    allWalls.reserve(m_walls.size());
+    for(WallItem* item:m_walls)
+    {
+        allWalls.append(item->walls() );
+    }
+
+    for (int i = 0; i < m_mapItems.size(); i++)
+    {
+        MapItem* item = m_mapItems[i];
+        QPixmap light = item->createLight();
+        if (light.isNull()||item->lightRadius()==0) continue;
+
+        // 1. Calculate the visibility polygon for THIS light
+        // (Optimization: Filter 'allWalls' to only those close to this light first)
+        QPointF lightCenter(item->x(), item->y());
+        double radius = std::max(light.width(), light.height()); // Approximate radius
+        QTransform transform;
+        transform.translate(item->x(), item->y());
+        transform.rotate(item->lightRotation());
+        QVector<QLineF> nearbyWalls;
+        QPolygonF lightBounds=transform.map(QPolygonF(QRectF(-light.width() / 2, -light.height() / 2,light.width(),light.height())));
+
+        for(auto& wall : allWalls) {
+            // Quick check if wall is somewhat inside light radius
+            if (lightBounds.intersects(QRectF(wall.p1(), wall.p2()).normalized())) {
+                nearbyWalls.append(wall);
+            }
+        }
+        double r = radius;
+        QPointF c = lightCenter;
+        // Create a box centered on the light
+        QVector<QLineF> boundaryWalls;
+        if(lightBounds.size()==5)
+        {
+            boundaryWalls << QLineF(lightBounds.at(0),lightBounds.at(1)); // Top
+            boundaryWalls << QLineF(lightBounds.at(1),lightBounds.at(2)); // Right
+            boundaryWalls << QLineF(lightBounds.at(2),lightBounds.at(3)); // Bottom
+            boundaryWalls << QLineF(lightBounds.at(3),lightBounds.at(0)); // Left
+
+        }
+        // 2. Combine your real map walls with these boundary walls
+        QVector<QLineF> checkingWalls = nearbyWalls + boundaryWalls;
+
+
+        QPolygonF visPoly = calculateVisibilityPolygon(lightCenter, radius, checkingWalls);
+
+        painter.save();
+
+        // 2. Apply the clipping path!
+        // This is the magic. The painter will ONLY draw where the polygon exists.
+        QPainterPath path;
+        path.addPolygon(visPoly);
+        painter.setClipPath(path);
+
+        // 3. Setup the composition mode to erase fog
+        painter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+
+        // 4. Draw the light exactly as you did before
+        painter.setTransform(transform);
+        painter.drawPixmap(-light.width() / 2, -light.height() / 2, light);
+
+        painter.restore();
+        // Clipping is removed when we restore()
+    }
+    painter.end();
+    m_fogOfWar->setPixmap(pixmap);
+}
+/*
 void Scene::updateFogOfWar()
 {
 
@@ -69,13 +218,32 @@ void Scene::updateFogOfWar()
     if(pixmap.isNull())return;
     painter.begin(&pixmap);
     painter.setRenderHints(QPainter::SmoothPixmapTransform|QPainter::Antialiasing);
+    painter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
     for(int i=0;i<m_mapItems.size();i++)
     {
         MapItem* item= m_mapItems[i];
-        painter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
-        QPixmap light=item->createLight();
+        if(item->lightRadius()<=0||item->blockLight())
+            continue;
+        QPixmap light=item->createLight();        
         if(light.isNull())
             continue;
+        for(int j=0;j<m_mapItems.size();j++)
+        {
+            MapItem* negItem= m_mapItems[j];
+            if(negItem->lightRadius()<=0||!negItem->blockLight())
+                continue;
+            QPixmap negLight=item->createLight();
+            if(negLight.isNull())
+                continue;
+            QPainter negPainter;
+            negPainter.begin(&light);
+            negPainter.setRenderHints(QPainter::SmoothPixmapTransform|QPainter::Antialiasing);
+            negPainter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+            negPainter.translate(negItem->x()-item->x(),negItem->y()-item->y());
+            negPainter.rotate(negItem->lightRotation());
+            negPainter.drawPixmap(-negLight.width()/2,-negLight.height()/2,negLight);
+
+        }
         painter.save();
         painter.translate(item->x(),item->y());
         painter.rotate(item->lightRotation());
@@ -86,7 +254,7 @@ void Scene::updateFogOfWar()
     m_fogOfWar->setPixmap(pixmap);
 
 }
-
+*/
 void Scene::updateGrid()
 {
 
@@ -156,13 +324,18 @@ void Scene::updateNow()
 
     for(int i=0;i<m_mapItems.size();i++)
     {
-        removeItem(m_mapItems[i]);
+        delete m_mapItems[i];
     }
+    m_mapItems.clear();
+    for(int i=0;i<m_walls.size();i++)
+    {
+        delete m_walls[i];
+    }
+    m_walls.clear();
     m_viewportItem->setRect(m_otherScene->m_viewportItem->x(),
                             m_otherScene->m_viewportItem->y(),
                             m_otherScene->m_viewportItem->width(),
                             m_otherScene->m_viewportItem->height());
-    m_mapItems.clear();
     if(!m_otherScene)
     {
         updateFogOfWar();
@@ -179,6 +352,12 @@ void Scene::updateNow()
     for(int i=0;i<m_otherScene->m_mapItems.size();i++)
     {
         addMarker(m_otherScene->m_mapItems[i]->createPresentItem());
+    }
+    for(int i=0;i<m_otherScene->m_walls.size();i++)
+    {
+        WallItem* item=new WallItem(*m_otherScene->m_walls[i]);
+        m_walls.append(item);
+        //addItem(item);
     }
     updateFogOfWar();
 }
@@ -299,12 +478,121 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect)
     painter->fillRect(rect,m_fogOfWarBrush);
 }
 
-void Scene::timerEvent(QTimerEvent *event)
+void Scene::timerEvent(QTimerEvent *)
 {
     if(!m_dirty)
         return;
     m_dirty=false;
     updateNow();
+}
+
+QList<WallItem *> Scene::walls() const
+{
+    return m_walls;
+}
+
+void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    switch(m_drawWallsMode)
+    {
+    case NoDraw:
+        break;
+    case DrawingPlacing:
+        if(m_floatingWalls)
+        {
+            m_floatingWalls->setPos(event->scenePos());
+            m_floatingWalls->addEndPos(event->scenePos());
+            m_drawWallsMode= DrawingMoving;
+        }
+        return;
+        break;
+    case DrawingMoving:
+         if(m_floatingWalls)
+        {
+             if(event->modifiers()&(Qt::ControlModifier|Qt::AltModifier|Qt::ShiftModifier))
+             {
+                 m_floatingWalls->addEndPos(event->scenePos());
+             }
+             else
+             {
+                 WallItem* item=new WallItem(*m_floatingWalls);
+
+                 m_walls.append(item);
+                 addItem(item);
+                 delete m_floatingWalls;
+                 m_floatingWalls=0;
+                 m_drawWallsMode= DrawingPlacing;
+             }
+            return;
+        }
+
+        break;
+    }
+    QGraphicsScene::mousePressEvent(event);
+}
+
+void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    switch(m_drawWallsMode)
+    {
+    case NoDraw:
+        break;
+    case DrawingPlacing:
+        if(m_floatingWalls==0)
+        {
+            m_floatingWalls=new WallItem;
+            addItem(m_floatingWalls);
+        }
+        m_floatingWalls->setPos(event->scenePos());
+        return;
+        break;
+    case DrawingMoving:
+        if(m_floatingWalls)
+        {
+            m_floatingWalls->setEndPos(event->scenePos());
+            return;
+        }
+
+        break;
+    }
+    QGraphicsScene::mouseMoveEvent(event);
+}
+
+void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsScene::mouseReleaseEvent(event);
+}
+
+bool Scene::drawWallsMode() const
+{
+    return m_drawWallsMode;
+}
+
+void Scene::setDrawWallsMode(bool newDrawWallsMode)
+{
+    if(!newDrawWallsMode)
+    {
+        m_drawWallsMode = NoDraw;
+        delete m_floatingWalls;
+        m_floatingWalls=nullptr;
+    }
+    else
+    {
+        m_drawWallsMode = DrawingPlacing;
+    }
+}
+
+void Scene::deleteWall(WallItem *item)
+{
+    for(int i=0;i<m_walls.size();i++)
+    {
+        if(m_walls[i]==item)
+        {
+            delete m_walls.takeAt(i);
+            return;
+        }
+    }
+    updateFogOfWar();
 }
 
 ViewportItem *Scene::viewportItem() const
@@ -322,9 +610,17 @@ QGraphicsPixmapItem *Scene::background() const
     return m_background;
 }
 
+void Scene::addWall(double x1,double y1,const QList<QPointF>& points)
+{
+    WallItem* item=new WallItem(x1,y1,points);
+    m_walls.append(item);
+    addItem(item);
+}
+
 void Scene::addMarker(MapItem *item)
 {
     m_mapItems<<item;
     item->setZValue(m_mapItems.size()+1);
     addItem(item);
+    item->reload();
 }

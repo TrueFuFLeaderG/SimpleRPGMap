@@ -63,7 +63,7 @@ void drawArrowDown(QPainter *painter,double x,double y)
     painter->drawLine(x,y,x+2,y-2);
     painter->drawLine(x,y,x-2,y-2);
 }
-void ViewportItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void ViewportItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
 
     painter->setPen(QPen(Qt::red,m_penWidth));

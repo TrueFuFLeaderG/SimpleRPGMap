@@ -10,8 +10,15 @@
 #include <QMessageBox>
 #include <QScreen>
 #include <QToolBar>
+#include <QVBoxLayout>
 #include <Scene.h>
 #include <qjsonobject.h>
+
+void MainWindow::updateSound(int value)
+{
+    // Optional: set volume (0.0 to 1.0)
+    m_audioOutput->setVolume(value/100.0);
+}
 MainWindow* MainWindow::m_mainWindow=0;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,10 +27,26 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(m_control);
 
     connect(m_maplist,&QAbstractItemView::doubleClicked,this,&MainWindow::openMap);
+    connect(m_soundList,&QAbstractItemView::doubleClicked,this,&MainWindow::playSound);
+
     QDockWidget* mapListDoc=new QDockWidget;
     mapListDoc->setWidget(m_maplist);
     addDockWidget(Qt::LeftDockWidgetArea,mapListDoc);
 
+    QDockWidget* soundListDoc=new QDockWidget(tr("Sound"));
+    QWidget* sound=new QWidget;
+    QSlider* slider = new QSlider(Qt::Horizontal);
+    QCheckBox* box=new QCheckBox(tr("loop"));
+    slider->setRange(0,100);
+    slider->setValue(50);
+    sound->setLayout(new QVBoxLayout);
+    sound->layout()->addWidget(box);
+    sound->layout()->addWidget(slider);
+    sound->layout()->addWidget(m_soundList);
+    connect(slider,&QSlider::valueChanged,this,&MainWindow::updateSound);
+    connect(box,&QCheckBox::toggled,this,&MainWindow::setLoopSound);
+    soundListDoc->setWidget(sound);
+    addDockWidget(Qt::LeftDockWidgetArea,soundListDoc,Qt::Vertical);
 
 
     QDockWidget* mapPropertiesDoc=new QDockWidget;
@@ -58,6 +81,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_control,&QMdiArea::subWindowActivated,this,&MainWindow::upateSettings);
     startTimer(60000);
+
+
+
+    m_player->setAudioOutput(m_audioOutput);
     load("./autosave.session.json",false);
 }
 
@@ -104,6 +131,17 @@ void MainWindow::setPresetScreen(int index)
 void MainWindow::openMap(const QModelIndex &index)
 {
     m_control->openMap(m_maplist->path(index));
+}
+void MainWindow::playSound(const QModelIndex &index)
+{
+    m_lastSound=m_soundList->path(index);
+    m_player->setSource(QUrl::fromLocalFile(m_lastSound));
+
+
+
+    // Start playback
+    m_player->play();
+
 }
 
 
@@ -175,6 +213,25 @@ void MainWindow::save(const QString &path)
         object["vy"]=control->scene()->viewportItem()->y();
         object["vw"]=control->scene()->viewportItem()->width();
         object["vh"]=control->scene()->viewportItem()->height();
+
+
+        QList<WallItem *>  walls=control->scene()->walls();
+        QJsonArray wallsJson;
+        for(int j=0;j<walls.size();j++)
+        {
+            QJsonArray wall;
+            wall.append(walls[j]->pos().x());
+            wall.append(walls[j]->pos().y());
+            QList<QPointF> points=walls[j]->rawPoints();
+            for(QPointF point:points)
+            {
+                wall.append(point.x());
+                wall.append(point.y());
+            }
+            wallsJson.append(wall);
+        }
+        object["walls"]=wallsJson;
+
         QList<MapItem *>  obj=control->scene()->mapItems();
         QJsonArray objects;
         for(int j=0;j<obj.size();j++)
@@ -184,7 +241,11 @@ void MainWindow::save(const QString &path)
         object["objects"]=objects;
         content.append(object);
     }
-    QJsonDocument doc(content);
+    QJsonObject saveFile;
+    saveFile["Maps"]=content;
+    if(m_control->currentMapControl())
+        saveFile["OpendMap"]=m_control->currentMapControl()->path();
+    QJsonDocument doc(saveFile);
     QFile f(path);
     if(f.open(QIODevice::WriteOnly|QIODevice::Text))
     {
@@ -212,8 +273,9 @@ void MainWindow::load(const QString &path,bool message)
             return;
         }
 
+        QJsonObject file=doc.object();
 
-        QJsonArray content=doc.array();
+        QJsonArray content=file["Maps"].toArray();
         for(int i=0;i<content.size();i++)
         {
             QJsonObject object=content[i].toObject();
@@ -235,11 +297,28 @@ void MainWindow::load(const QString &path,bool message)
             {
                 control->scene()->addMarker(new MapItem(array[j].toObject()));
             }
+
+            QJsonArray wallArray=object["walls"].toArray();
+            for(int j=0;j<wallArray.size();j++)
+            {
+                QJsonArray wall=wallArray[j].toArray();
+                QList<QPointF> points;
+                for(int i=2;i<wall.size();i+=2)
+                {
+                    points<<QPointF(wall.at(i).toDouble(),wall.at(i+1).toDouble());
+                }
+                control->scene()->addWall(wall.at(0).toDouble(),wall.at(1).toDouble(),points);
+            }
+
+
             control->scene()->updateFogOfWar();
             m_control->setActiveSubWindow(0);
             m_control->openMap(object["path"].toString());
 
         }
+        QString opend=file["OpendMap"].toString();
+        if(!opend.isEmpty())
+            m_control->openMap(opend);
         upateSettings();
 
     }
@@ -247,6 +326,19 @@ void MainWindow::load(const QString &path,bool message)
     {
         if(message)
             QMessageBox::warning(this,tr("can not open %0").arg(path),tr("can not open %0").arg(path));
+    }
+}
+
+
+
+void MainWindow::setLoopSound(bool newLoopSound)
+{
+    if(newLoopSound)
+        m_player->setLoops(QMediaPlayer::Infinite);
+    else
+    {
+        m_player->stop();
+        m_player->setLoops(QMediaPlayer::Once);
     }
 }
 
